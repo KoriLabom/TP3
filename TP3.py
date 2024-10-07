@@ -120,6 +120,7 @@ def gestCandidatos(): #GESTIONAR CANDIDATOS
             case "2": reportarCandidato()
 def matcheos():
     cls()
+    print("NO SE HACE")
 def calcularEdad(fecha_nacimiento_str):
     fecha_nacimiento = datetime.strptime(fecha_nacimiento_str, "%d-%m-%Y")
     fecha_actual = datetime.now()
@@ -159,20 +160,6 @@ def opcmenuMod():
             case "5": Bonustrack2()
             case "6": Bonustrack3()
             case "0": maxint = 0
-def gestReportes():
-    opc = ""
-    while(opc!="0"):
-        menuGestRep()
-        opc=input("\nIngrese opción:  ")
-        while(opc<"0" or opc>"1"):
-            opc = input("Ingreso invalido, ingrese otra opción: ")
-        if opc=="1":
-            reportes()
-def menuGestRep():
-    cls()
-    print("***** GESTIONAR REPORTES *****\n")
-    print("   1. Ver reportes")
-    print("   0. Volver")
 def gestUsuarios():
     opc = ""
     while(opc!= "0"):
@@ -186,6 +173,20 @@ def menuGestUsuarios():
     cls()
     print("***** GESTIONAR USUARIOS *****\n")
     print("   1. Desactivar usuario")
+    print("   0. Volver")
+def gestReportes():
+    opc = ""
+    while(opc!="0"):
+        menuGestRep()
+        opc=input("\nIngrese opción:  ")
+        while(opc<"0" or opc>"1"):
+            opc = input("Ingreso invalido, ingrese otra opción: ")
+        if opc=="1":
+            reportes()
+def menuGestRep():
+    cls()
+    print("***** GESTIONAR REPORTES *****\n")
+    print("   1. Ver reportes")
     print("   0. Volver")
 def repEstadisticos():
     cls()
