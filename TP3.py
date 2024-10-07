@@ -2,6 +2,7 @@ import pickle
 import os
 import os.path
 import datetime
+from datetime import date
 import io
 
 class Alumnos:
@@ -38,7 +39,6 @@ class Reportes:
         self.razon_reporte = " "
 
 def cls():
-
     os.system("cls")
 
 def menuEstudiante(): #MUESTRA MENU PRINCIPAL
@@ -120,8 +120,6 @@ def gestCandidatos(): #GESTIONAR CANDIDATOS
             case "2": reportarCandidato()
 def matcheos():
     cls()
-    print("***** MATCHEOS *****\n")
-    input("En construcción, presione Enter para volver")
 def calcularEdad(fecha_nacimiento_str):
     fecha_nacimiento = datetime.strptime(fecha_nacimiento_str, "%d-%m-%Y")
     fecha_actual = datetime.now()
@@ -129,19 +127,6 @@ def calcularEdad(fecha_nacimiento_str):
     if (fecha_actual.month, fecha_actual.day) < (fecha_nacimiento.month, fecha_nacimiento.day):
         edad -= 1
     return edad
-def validarUsuario(idR, arrayEstudiantes):
-    global idReportado
-    idActual = 0
-    try:
-        idR_int = int(idR)
-    except ValueError:
-        idR_int = None
-    for estudiante in arrayEstudiantes:
-        if (idR_int == idActual or idR == estudiante[3]) and estudiante[2] == "Activo":
-            idReportado = idActual
-            return True
-        idActual += 1
-    return False
 def menuReportar():
     cls()
     mostrarCandidatos()
@@ -156,6 +141,7 @@ def menuModerador():
     print("   3. Reportes Estadisticos")
     print("   4. Bonus Track 1")
     print("   5. Bonus Track 2")
+    print("   6. Bonus Track 3")
     print("   0. Salir")
 def opcmenuMod():
     global maxint
@@ -163,7 +149,7 @@ def opcmenuMod():
     while(opc!= "0"):
         menuModerador()
         opc = input("\nIngrese una opción:  ")
-        while (opc<"0" or opc>"5"):
+        while (opc<"0" or opc>"6"):
             opc = input("ingreso inválido, ingrese otra opción: ")
         match opc:
             case "1": gestUsuarios()
@@ -171,6 +157,7 @@ def opcmenuMod():
             case "3": repEstadisticos()
             case "4": Bonustrack1()
             case "5": Bonustrack2()
+            case "6": Bonustrack3()
             case "0": maxint = 0
 def gestReportes():
     opc = ""
@@ -202,8 +189,6 @@ def menuGestUsuarios():
     print("   0. Volver")
 def repEstadisticos():
     cls()
-    print("***** REPORTES ESTADISTICOS *****\n")
-    input("En construcción, presione Enter para volver")
 def inicio():
     global salir
     salir=""
