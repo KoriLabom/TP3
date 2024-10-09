@@ -58,7 +58,7 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
         alumno.bio = "Estudiante de ingeniería."
         alumno.hob = "leer, fútbol"
         alumno.sexo = "H"
-        formatearAlumnos()
+        formatearAlumnos(alumno)
         pickle.dump(alumno, arLoAlumnos)
 
         #Alumno 2
@@ -71,6 +71,7 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
         alumno.bio = "Estudiante de medicina."
         alumno.hob = "pintar, natación"
         alumno.sexo = "M"
+        formatearAlumnos(alumno)
         pickle.dump(alumno, arLoAlumnos)
 
         #Alumno 3
@@ -83,6 +84,7 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
         alumno.bio = "Estudiante de economía."
         alumno.hob = "ajedrez, ciclismo"
         alumno.sexo = "H"
+        formatearAlumnos(alumno)
         pickle.dump(alumno, arLoAlumnos)
 
         #Alumno 4
@@ -149,7 +151,6 @@ def formatearAlumnos(alumnos):
     alumnos.id_est = str(alumnos.id_est).ljust(5, ' ')
     alumnos.email = str(alumnos.email).ljust(32, ' ')
     alumnos.contraseña = str(alumnos.contraseña).ljust(32, ' ')
-    alumnos.estado = str(alumnos.estado).ljust()
     alumnos.nombre = alumnos.nombre.ljust(32, ' ')
     alumnos.fnac = alumnos.fnac.ljust(10, ' ')
     alumnos.bio = alumnos.bio.ljust(255, ' ')
@@ -338,5 +339,22 @@ def calcularEdad(fecha_nacimiento_str):
     if (fecha_actual.month, fecha_actual.day) < (fecha_nacimiento.month, fecha_nacimiento.day):
         edad -= 1
     return edad
+def cambiarBiografia():
+    biografia = "_"
+    while biografia != "":
+        cls()
+        id=1
+        arLoAlumnos.seek(0,0)
+        for i in range(id-1):
+            pickle.load(arLoAlumnos)
+        alumno = pickle.load(arLoAlumnos)
+        print("BIOGRAFIA ACTUAL: " + '"' + alumno.bio + '"')
+        print("")
+        biografia = input("Ingrese su nueva biografía, o Enter para salir: ")
+        #if biografia != "":
+        #    arrayEstudiantes[id][5] = biografia
+        #    cls()
+        #    print("BIOGRAFIA ACTUALIZADA A: " + arrayEstudiantes[id][5])
 
 inicializar()
+cambiarBiografia()
