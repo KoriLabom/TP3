@@ -1,9 +1,4 @@
-import pickle
-import os
-import os.path
-import datetime
-from datetime import date
-import io
+import pickle ; import os ; import os.path ; import datetime ; from datetime import date ; import io
 
 class Alumno:
     def __init__ (self):
@@ -21,7 +16,7 @@ class Moderador:
         self.id_mod = 0
         self.email = " "
         self.contraseña = " "
-        self.estado = " "
+        self.estado = True
         self.nombre = " "
 class Administrador:
     def __init__ (self):
@@ -63,6 +58,7 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
         alumno.bio = "Estudiante de ingeniería."
         alumno.hob = "leer, fútbol"
         alumno.sexo = "H"
+        formatearAlumnos()
         pickle.dump(alumno, arLoAlumnos)
 
         #Alumno 2
@@ -148,6 +144,7 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
         print("El archivo " + arFiReportes + " no existía y fue creado")
         arLoReportes = open(arFiReportes, "w+b")
         input()
+
 def formatearAlumnos(alumnos):
     alumnos.id_est = str(alumnos.id_est).ljust(5, ' ')
     alumnos.email = str(alumnos.email).ljust(32, ' ')
@@ -157,6 +154,16 @@ def formatearAlumnos(alumnos):
     alumnos.fnac = alumnos.fnac.ljust(10, ' ')
     alumnos.bio = alumnos.bio.ljust(255, ' ')
     alumnos.hob = alumnos.hob.ljust(255, ' ')
+def formatearModeradores(moderador):
+    moderador.id_mod = str(moderador.id_mod).ljust(5, ' ')
+    moderador.email = moderador.email.ljust(32, ' ')
+    moderador.contraseña = moderador.contraseña.ljust(32, ' ')
+    moderador.nombre = moderador.nombre.ljust(32, ' ')
+def formatearAdministradores(administrador):
+    administrador.id_adm = str(administrador.id_adm).ljust(5, ' ')
+    administrador.email = administrador.email.ljust(32, ' ')
+    administrador.contraseña = administrador.contraseña.ljust(32, ' ')
+
 def cls():
     os.system("cls")
 #MENUS y OPCIONES
