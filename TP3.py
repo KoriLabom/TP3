@@ -5,34 +5,34 @@ import datetime
 from datetime import date
 import io
 
-class Alumnos:
+class Alumno:
     def __init__ (self):
         self.id_est = 0
         self.email = " "
         self.contraseña = " "
-        self.estado = " "
+        self.estado = True
         self.nombre = " "
-        self.fnac = 0
+        self.fnac = " "
         self.bio = " "
         self.hob = " "
         self.sexo = " " 
-class Moderadores:
+class Moderador:
     def __init__ (self):
         self.id_mod = 0
         self.email = " "
         self.contraseña = " "
         self.estado = " "
         self.nombre = " "
-class Administradores:
+class Administrador:
     def __init__ (self):
         self.id_adm = 0
         self.email = " "
         self.contraseña = " "
-class Likes: 
+class Like: 
     def __init__ (self):
         self.remitente = 0
         self.destinatario = 0  
-class Reportes:
+class Reporte:
     def __init__ (self):
         self.id_reportante = 0
         self.id_reportado = 0
@@ -52,7 +52,7 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
         print("El archivo " + arFiAlumnos + " no existía y fue creado")
         arLoAlumnos = open(arFiAlumnos, "w+b")
         #Alumno 1
-        alumno = Alumnos()
+        alumno = Alumno()
         alumno.id_est = 1
         alumno.email = "estudiante1@ayed.com"
         alumno.contraseña = "111222"
@@ -110,7 +110,7 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
         arLoModeradores = open(arFiModeradores, "w+b")
         input()
     
-    arFiAdmin = "admin.dat"
+    arFiAdmin = "admin.dat" #CREAR O ABRIR Admin
     if os.path.exists(arFiAdmin):
         arLoAdmin = open(arFiAdmin, "r+b")
     else:
@@ -118,7 +118,7 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
         arLoAdmin = open(arFiAdmin, "w+b")
         input()
     
-    arFiLikes = "likes.dat"
+    arFiLikes = "likes.dat" #CREAR O ABRIR Likes
     if os.path.exists(arFiLikes):
         arLoLikes = open(arFiLikes, "r+b")
     else:
@@ -126,18 +126,25 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
         arLoLikes = open(arFiLikes, "w+b")
         input()
     
-    arFiReportes = "reportes.dat"
+    arFiReportes = "reportes.dat" #CREAR O ABRIR Reportes
     if os.path.exists(arFiReportes):
         arLoReportes = open(arFiReportes, "r+b")
     else:
         print("El archivo " + arFiReportes + " no existía y fue creado")
         arLoReportes = open(arFiReportes, "w+b")
         input()
-
-    
+def formatearAlumnos(alumnos):
+    alumnos.id_est = str(alumnos.id_est).ljust(5, ' ')
+    alumnos.email = str(alumnos.email).ljust(32, ' ')
+    alumnos.contraseña = str(alumnos.contraseña).ljust(32, ' ')
+    alumnos.estado = str(alumnos.estado).ljust()
+    alumnos.nombre = alumnos.nombre.ljust(32, ' ')
+    alumnos.fnac = alumnos.fnac.ljust(10, ' ')
+    alumnos.bio = alumnos.bio.ljust(255, ' ')
+    alumnos.hob = alumnos.hob.ljust(255, ' ')
 def cls():
     os.system("cls")
-
+#MENUS y OPCIONES
 def menuEstudiante(): #MUESTRA MENU PRINCIPAL
     cls()
     print(" ***** MENÚ ESTUDIANTE *****\n")
@@ -167,19 +174,8 @@ def subMenuGestionarperfil(): #1 MUESTRA SUBMENU: GESTIONAR PERFIL
     print("   1. Editar mis datos personales")
     print("   2. Eliminar mi perfil")
     print("   0. Volver\n")
-def fechaValida(fechastr:str)->bool:
-    try:
-        fechanac = datetime.strptime(fechastr, '%d-%m-%Y').date()
-        fechaactual = date.today()
-        edad = fechaactual.year - fechanac.year - ((fechaactual.month, fechaactual.day) < (fechanac.month, fechanac.day))
-        if 1924 <= fechanac.year <= fechaactual.year and 18 <= edad < 122:
-            return True
-        else:
-            return False
-    except ValueError:
-        return False
 def opcionesEditar():
-    cls()      
+    cls()
     print("***** EDITAR DATOS PERSONALES *****\n")
     print("   ¿Qué desea modificar?")
     print("   1. Fecha de nacimiento")
@@ -218,13 +214,6 @@ def gestCandidatos(): #GESTIONAR CANDIDATOS
 def matcheos():
     cls()
     print("NO SE HACE")
-def calcularEdad(fecha_nacimiento_str):
-    fecha_nacimiento = datetime.strptime(fecha_nacimiento_str, "%d-%m-%Y")
-    fecha_actual = datetime.now()
-    edad = fecha_actual.year - fecha_nacimiento.year
-    if (fecha_actual.month, fecha_actual.day) < (fecha_nacimiento.month, fecha_nacimiento.day):
-        edad -= 1
-    return edad
 def menuReportar():
     cls()
     mostrarCandidatos()
@@ -307,6 +296,25 @@ def inicio():
                 case "1": login()                      
                 case "2": registro()                               
                 case "0": finPrograma()
+#FIN MENUS
 
+def fechaValida(fechastr:str)->bool:
+    try:
+        fechanac = datetime.strptime(fechastr, '%d-%m-%Y').date()
+        fechaactual = date.today()
+        edad = fechaactual.year - fechanac.year - ((fechaactual.month, fechaactual.day) < (fechanac.month, fechanac.day))
+        if 1924 <= fechanac.year <= fechaactual.year and 18 <= edad < 122:
+            return True
+        else:
+            return False
+    except ValueError:
+        return False
+def calcularEdad(fecha_nacimiento_str):
+    fecha_nacimiento = datetime.strptime(fecha_nacimiento_str, "%d-%m-%Y")
+    fecha_actual = datetime.now()
+    edad = fecha_actual.year - fecha_nacimiento.year
+    if (fecha_actual.month, fecha_actual.day) < (fecha_nacimiento.month, fecha_nacimiento.day):
+        edad -= 1
+    return edad
 
 inicializar()
