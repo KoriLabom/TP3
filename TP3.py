@@ -5,7 +5,7 @@ import datetime
 from datetime import date
 import io
 
-class Alumnos:
+class Alumno:
     def __init__ (self):
         self.id_est = 0
         self.email = " "
@@ -16,23 +16,23 @@ class Alumnos:
         self.bio = " "
         self.hob = " "
         self.sexo = " " 
-class Moderadores:
+class Moderador:
     def __init__ (self):
         self.id_mod = 0
         self.email = " "
         self.contraseña = " "
         self.estado = " "
         self.nombre = " "
-class Administradores:
+class Administrador:
     def __init__ (self):
         self.id_adm = 0
         self.email = " "
         self.contraseña = " "
-class Likes: 
+class Like: 
     def __init__ (self):
         self.remitente = 0
         self.destinatario = 0  
-class Reportes:
+class Reporte:
     def __init__ (self):
         self.id_reportante = 0
         self.id_reportado = 0
@@ -48,11 +48,12 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
     arFiAlumnos = "alumnos.dat" #CREAR O ABRIR Alumnos
     if os.path.exists(arFiAlumnos):
         arLoAlumnos = open(arFiAlumnos, "r+b")
+            
     else:
         print("El archivo " + arFiAlumnos + " no existía y fue creado")
         arLoAlumnos = open(arFiAlumnos, "w+b")
         #Alumno 1
-        alumno = Alumnos()
+        alumno = Alumno()
         alumno.id_est = 1
         alumno.email = "estudiante1@ayed.com"
         alumno.contraseña = "111222"
@@ -108,6 +109,15 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
     else:
         print("El archivo " + arFiModeradores + " no existía y fue creado")
         arLoModeradores = open(arFiModeradores, "w+b")
+        #Alumno 1
+        moderador = Moderador()
+        moderador.id_mod = 1
+        moderador.email = "moderador1@ayed.com"
+        moderador.contraseña = "111222"
+        moderador.estado = True
+        moderador.nombre = "Mateo Labombarda"
+
+        pickle.dump(alumno, arLoAlumnos)
         input()
     
     arFiAdmin = "admin.dat"
@@ -116,6 +126,11 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
     else:
         print("El archivo " + arFiAdmin + " no existía y fue creado")
         arLoAdmin = open(arFiAdmin, "w+b")
+        administrador = Administrador()
+        administrador.id_adm = 1
+        administrador.email = "admin1@ayed.com"
+        administrador.contraseña = "111222"
+        pickle.dump(alumno, arLoAlumnos)
         input()
     
     arFiLikes = "likes.dat"
