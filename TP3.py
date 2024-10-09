@@ -51,6 +51,55 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
     else:
         print("El archivo " + arFiAlumnos + " no existía y fue creado")
         arLoAlumnos = open(arFiAlumnos, "w+b")
+        #Alumno 1
+        alumno = Alumnos()
+        alumno.id_est = 1
+        alumno.email = "estudiante1@ayed.com"
+        alumno.contraseña = "111222"
+        alumno.estado = True
+        alumno.nombre = "Juan Perez"
+        alumno.fnac = "15-01-2000"
+        alumno.bio = "Estudiante de ingeniería."
+        alumno.hob = "leer, fútbol"
+        alumno.sexo = "H"
+        pickle.dump(alumno, arLoAlumnos)
+
+        #Alumno 2
+        alumno.id_est = 2
+        alumno.email = "estudiante2@ayed.com"
+        alumno.contraseña = "333444"
+        alumno.estado = True
+        alumno.nombre = "Maria Gomez"
+        alumno.fnac = "22-04-1998"
+        alumno.bio = "Estudiante de medicina."
+        alumno.hob = "pintar, natación"
+        alumno.sexo = "M"
+        pickle.dump(alumno, arLoAlumnos)
+
+        #Alumno 3
+        alumno.id_est = 3
+        alumno.email = "estudiante3@ayed.com"
+        alumno.contraseña = "555666"
+        alumno.estado = False
+        alumno.nombre = "Luis Lopez"
+        alumno.fnac = "05-09-1999"
+        alumno.bio = "Estudiante de economía."
+        alumno.hob = "ajedrez, ciclismo"
+        alumno.sexo = "H"
+        pickle.dump(alumno, arLoAlumnos)
+
+        #Alumno 4
+        alumno.id_est = 4
+        alumno.email = "estudiante4@ayed.com"
+        alumno.contraseña = "777888"
+        alumno.estado = True
+        alumno.nombre = "Ana Martinez"
+        alumno.fnac = "30-07-2001"
+        alumno.bio = "Estudiante de derecho."
+        alumno.hob = "bailar, viajar"
+        alumno.sexo = "M"
+        pickle.dump(alumno, arLoAlumnos)
+
         input()
     
     arFiModeradores = "moderadores.dat" #CREAR O ABRIR Moderadores
@@ -85,7 +134,7 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
         arLoReportes = open(arFiReportes, "w+b")
         input()
 
-
+    
 def cls():
     os.system("cls")
 
