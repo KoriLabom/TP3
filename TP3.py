@@ -38,6 +38,54 @@ class Reportes:
         self.id_reportado = 0
         self.razon_reporte = " "
 
+def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
+    global arFiAlumnos, arLoAlumnos
+    global arFiModeradores, arLoModeradores
+    global arFiAdmin, arLoAdmin
+    global arFiLikes, arLoLikes
+    global arFiReportes, arLoReportes
+
+    arFiAlumnos = "alumnos.dat" #CREAR O ABRIR Alumnos
+    if os.path.exists(arFiAlumnos):
+        arLoAlumnos = open(arFiAlumnos, "r+b")
+    else:
+        print("El archivo " + arFiAlumnos + " no existía y fue creado")
+        arLoAlumnos = open(arFiAlumnos, "w+b")
+        input()
+    
+    arFiModeradores = "moderadores.dat" #CREAR O ABRIR Moderadores
+    if os.path.exists(arFiModeradores):
+        arLoModeradores = open(arFiModeradores, "r+b")
+    else:
+        print("El archivo " + arFiModeradores + " no existía y fue creado")
+        arLoModeradores = open(arFiModeradores, "w+b")
+        input()
+    
+    arFiAdmin = "admin.dat"
+    if os.path.exists(arFiAdmin):
+        arLoAdmin = open(arFiAdmin, "r+b")
+    else:
+        print("El archivo " + arFiAdmin + " no existía y fue creado")
+        arLoAdmin = open(arFiAdmin, "w+b")
+        input()
+    
+    arFiLikes = "likes.dat"
+    if os.path.exists(arFiLikes):
+        arLoLikes = open(arFiLikes, "r+b")
+    else:
+        print("El archivo " + arFiLikes + " no existía y fue creado")
+        arLoLikes = open(arFiLikes, "w+b")
+        input()
+    
+    arFiReportes = "reportes.dat"
+    if os.path.exists(arFiReportes):
+        arLoReportes = open(arFiReportes, "r+b")
+    else:
+        print("El archivo " + arFiReportes + " no existía y fue creado")
+        arLoReportes = open(arFiReportes, "w+b")
+        input()
+
+
 def cls():
     os.system("cls")
 
@@ -210,4 +258,6 @@ def inicio():
                 case "1": login()                      
                 case "2": registro()                               
                 case "0": finPrograma()
-inicio()
+
+
+inicializar()
