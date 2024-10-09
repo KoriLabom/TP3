@@ -48,6 +48,7 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
     arFiAlumnos = "alumnos.dat" #CREAR O ABRIR Alumnos
     if os.path.exists(arFiAlumnos):
         arLoAlumnos = open(arFiAlumnos, "r+b")
+            
     else:
         print("El archivo " + arFiAlumnos + " no existía y fue creado")
         arLoAlumnos = open(arFiAlumnos, "w+b")
@@ -108,6 +109,15 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
     else:
         print("El archivo " + arFiModeradores + " no existía y fue creado")
         arLoModeradores = open(arFiModeradores, "w+b")
+        #Alumno 1
+        moderador = Moderador()
+        moderador.id_mod = 1
+        moderador.email = "moderador1@ayed.com"
+        moderador.contraseña = "111222"
+        moderador.estado = True
+        moderador.nombre = "Mateo Labombarda"
+
+        pickle.dump(alumno, arLoAlumnos)
         input()
     
     arFiAdmin = "admin.dat" #CREAR O ABRIR Admin
@@ -116,6 +126,11 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
     else:
         print("El archivo " + arFiAdmin + " no existía y fue creado")
         arLoAdmin = open(arFiAdmin, "w+b")
+        administrador = Administrador()
+        administrador.id_adm = 1
+        administrador.email = "admin1@ayed.com"
+        administrador.contraseña = "111222"
+        pickle.dump(alumno, arLoAlumnos)
         input()
     
     arFiLikes = "likes.dat" #CREAR O ABRIR Likes
