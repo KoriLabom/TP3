@@ -201,6 +201,19 @@ def opcmenuEst(): #TOMA OPCION Y DERIVA
             case "3": matcheos()   
             case "4": reportesEstadisticos()
             case "0": maxint = 0
+def gestPerfil(): #GESTIONAR PERFIL
+    global opcsubp
+    opcsubp = ""  # asignación interna para obligar al mientras a que entre aunque sea una vez
+    while (opcsubp!="0"):
+        subMenuGestionarperfil()        
+        opcsubp = input("\nIngrese una opción: ")
+        while (opcsubp<"0" or opcsubp >"2"):
+            opcsubp = input("Ingreso inválido, ingrese otra opción: ")
+        match opcsubp:
+            case "1": 
+                editarDatos()
+            case "2": 
+                eliminarPerfil()
 def subMenuGestionarperfil(): #1 MUESTRA SUBMENU: GESTIONAR PERFIL
     cls()
     print("***** GESTIONAR MI PERFIL *****\n")
@@ -358,7 +371,7 @@ def cambiarBiografia():
             pos=arLoAlumnos.tell()
             alumno=pickle.load(arLoAlumnos)
 
-        print("BIOGRAFIA ACTUAL: " + '"' + alumno.bio + '"')
+        print("BIOGRAFIA ACTUAL: " + '"' + alumno.bio.strip() + '"')
         print("")
         biografia = input("Ingrese su nueva biografía, o Enter para salir: ")
         if biografia != "":
@@ -368,7 +381,7 @@ def cambiarBiografia():
             formatearAlumnos(alumno)
             pickle.dump(alumno,arLoAlumnos)
             arLoAlumnos.flush()
-            print("BIOGRAFIA ACTUALIZADA A: " + alumno.bio)
+            print("BIOGRAFIA ACTUALIZADA A: " + alumno.bio.strip())
             input()
 
 def registro():
@@ -435,7 +448,7 @@ def login():
     encontrado = False  # Variable para controlar si se encontró un usuario válido
 
     while not encontrado and maxint < 3:
-        id = 0
+        id = 1
         cls()
         print("*****  *****\n")
         print("Si realizas 3 intentos incorrectos, el programa se cerrará.")
@@ -460,11 +473,13 @@ def login():
                         encontrado = True
                         if alumno.estado == True:
                             cls()
-                            input(f"\n|Bienvenido {alumno.nombre}|\n")
+                            input(f"\n|Bienvenido {alumno.nombre.strip()}|\n")
                             opcmenuEst()  # Función para menú de estudiantes
                         else:
                             cls()
                             input("Usuario inactivo, intente nuevamente\nPresione enter para continuar:\n")
+                    else:
+                        id+=1
                 except EOFError:
                     break  # Se alcanza el final del archivo de alumnos
 
