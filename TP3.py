@@ -2,7 +2,7 @@ import pickle ; import os ; import os.path ; import datetime ; from datetime imp
 
 class Alumno:
     def __init__(self):
-        self.id_est = 0
+        self.id = 0
         self.email = " "
         self.contraseña = " "
         self.estado = True
@@ -15,14 +15,14 @@ class Alumno:
 
 class Moderador:
     def __init__ (self):
-        self.id_mod = 0
+        self.id = 0
         self.email = " "
         self.contraseña = " "
         self.estado = True
         self.nombre = " "
 class Administrador:
     def __init__ (self):
-        self.id_adm = 0
+        self.id = 0
         self.email = " "
         self.contraseña = " "
         self.estado = True
@@ -54,7 +54,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         arLoAlumnos = open(arFiAlumnos, "w+b")
         #Alumno 1
         alumno = Alumno()
-        alumno.id_est = 1
+        alumno.id = 1
         alumno.email = "estudiante1@ayed.com"
         alumno.contraseña = "111222"
         alumno.estado = True
@@ -67,7 +67,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         pickle.dump(alumno, arLoAlumnos)
 
         #Alumno 2
-        alumno.id_est = 2
+        alumno.id = 2
         alumno.email = "estudiante2@ayed.com"
         alumno.contraseña = "333444"
         alumno.estado = True
@@ -80,7 +80,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         pickle.dump(alumno, arLoAlumnos)
 
         #Alumno 3
-        alumno.id_est = 3
+        alumno.id = 3
         alumno.email = "estudiante3@ayed.com"
         alumno.contraseña = "555666"
         alumno.estado = False
@@ -93,7 +93,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         pickle.dump(alumno, arLoAlumnos)
 
         #Alumno 4
-        alumno.id_est = 4
+        alumno.id = 4
         alumno.email = "estudiante4@ayed.com"
         alumno.contraseña = "777888"
         alumno.estado = True
@@ -115,7 +115,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         arLoModeradores = open(arFiModeradores, "w+b")
         #Alumno 1
         moderador = Moderador()
-        moderador.id_mod = 1
+        moderador.id = 1
         moderador.email = "moderador1@ayed.com"
         moderador.contraseña = "111222"
         moderador.estado = True
@@ -131,7 +131,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         print("El archivo " + arFiAdmin + " no existía y fue creado")
         arLoAdmin = open(arFiAdmin, "w+b")
         administrador = Administrador()
-        administrador.id_adm = 1
+        administrador.id = 1
         administrador.email = "admin1@ayed.com"
         administrador.contraseña = "111222"
         administrador.estado = True
@@ -162,7 +162,7 @@ def cerrarArchivos():
     arLoReportes.close()
     input("Archivos cerrados. Finalizando programa...")
 def formatearAlumnos(alumnos):
-    alumnos.id_est = str(alumnos.id_est).ljust(5, ' ')
+    alumnos.id = str(alumnos.id).ljust(5, ' ')
     alumnos.email = str(alumnos.email).ljust(32, ' ')
     alumnos.contraseña = str(alumnos.contraseña).ljust(32, ' ')
     alumnos.nombre = alumnos.nombre.ljust(32, ' ')
@@ -170,12 +170,12 @@ def formatearAlumnos(alumnos):
     alumnos.bio = alumnos.bio.ljust(255, ' ')
     alumnos.hob = alumnos.hob.ljust(255, ' ')
 def formatearModeradores(moderador):
-    moderador.id_mod = str(moderador.id_mod).ljust(5, ' ')
+    moderador.id = str(moderador.id).ljust(5, ' ')
     moderador.email = moderador.email.ljust(32, ' ')
     moderador.contraseña = moderador.contraseña.ljust(32, ' ')
     moderador.nombre = moderador.nombre.ljust(32, ' ')
 def formatearAdministradores(administrador):
-    administrador.id_adm = str(administrador.id_adm).ljust(5, ' ')
+    administrador.id = str(administrador.id).ljust(5, ' ')
     administrador.email = administrador.email.ljust(32, ' ')
     administrador.contraseña = administrador.contraseña.ljust(32, ' ')
 
@@ -532,7 +532,7 @@ def verCandidatos():
                 alumno = pickle.load(arLoAlumnos)  # Leer cada alumno desde el archivo
                 # Si el nombre o ID coinciden y el estado es True
                 if (alumno.nombre.strip().lower() == meGusta.lower() or n == meGustaID) and alumno.estado: 
-                    id_estudiante = alumno.id_est
+                    id_estudiante = alumno.id
                     encontrado = True  # Marcamos que se ha encontrado el alumno
 
         # Después del ciclo, si se encontró el alumno con estado True
@@ -577,7 +577,7 @@ def registro():
     alumno = Alumno()
     
     if os.path.getsize(arFiAlumnos) == 0:
-        alumno.id_est = 1
+        alumno.id = 1
     else:
         arLoAlumnos.seek(0, 0)
         alumno = pickle.load(arLoAlumnos)
@@ -586,7 +586,7 @@ def registro():
 
         cantReg = tamArc//tamReg
 
-        alumno.id_est = cantReg + 1
+        alumno.id = cantReg + 1
     
     email = str(input("Ingrese correo electrónico (MAX. 32 Carac): \n"))
     while len(email)>32:
@@ -684,7 +684,7 @@ def buscarSecuencial(email, contr, archivo, tipo_usuario):
                     if usuario.estado == True:
                         cls()
                         input(f"\n|Bienvenido {usuario.nombre.strip()} ({tipo_usuario})|\n")
-                        id=int(usuario.id_est)
+                        id=int(usuario.id)
                         if tipo_usuario == "alumno":
                             opcmenuEst()  # Función para menú de estudiantes
                         elif tipo_usuario == "moderador":
