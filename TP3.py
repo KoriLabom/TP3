@@ -485,6 +485,32 @@ def cambiarSexo():
         formatearAlumnos(alumno)
         pickle.dump(alumno,arLoAlumnos)
         arLoAlumnos.flush()
+def eliminarPerfil():
+    global opcE, opcsubp
+    opc = "1"
+    arLoAlumnos.seek(0,0)
+    for i in range(0,id):
+        pos=arLoAlumnos.tell()
+        alumno=pickle.load(arLoAlumnos)
+    cls()
+    print("***** ELIMINAR PERFIL *****\n")
+    print("¿Está seguro que desea eliminar su perfil, " + alumno.nombre + "?")
+    print(" 1. Eliminar")
+    print(" 0. Salir")
+    opc = input("\nIngrese una opción: ")
+    while (opc<"0" or opc>"1"):
+        opc = input("Ingreso inválido, ingrese otra opción: ")
+    if opc == "1":
+
+        arLoAlumnos.seek(pos,0)
+        alumno.estado = False
+        formatearAlumnos(alumno)
+        pickle.dump(alumno,arLoAlumnos)
+        arLoAlumnos.flush()
+        print("Su usuario ha sido desactivado correctamente!")
+        input()   
+        opcE="0"
+        opcsubp="0"
 def buscarLike(dador, receptor):
     if os.path.getsize(arFiLikes) != 0:  # Si el archivo no está vacío
         arLoLikes.seek(0, 0)  # Posicionamos el puntero al inicio del archivo
