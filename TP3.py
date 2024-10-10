@@ -1,4 +1,4 @@
-import pickle ; import os ; import os.path ; import datetime ; from datetime import date ; import io
+import pickle ; import os ; import os.path ; import datetime ; from datetime import date ; import io ; import getpass
 
 class Alumno:
     def __init__ (self):
@@ -33,7 +33,7 @@ class Reporte:
         self.id_reportado = 0
         self.razon_reporte = " "
 
-def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
+def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
     global arFiAlumnos, arLoAlumnos
     global arFiModeradores, arLoModeradores
     global arFiAdmin, arLoAdmin
@@ -115,7 +115,7 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
         moderador.estado = True
         moderador.nombre = "Mateo Labombarda"
 
-        pickle.dump(alumno, arLoAlumnos)
+        pickle.dump(moderador, arLoModeradores)
         input()
     
     arFiAdmin = "admin.dat" #CREAR O ABRIR Admin
@@ -128,7 +128,7 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
         administrador.id_adm = 1
         administrador.email = "admin1@ayed.com"
         administrador.contraseña = "111222"
-        pickle.dump(alumno, arLoAlumnos)
+        pickle.dump(administrador, arLoAdmin)
         input()
     
     arFiLikes = "likes.dat" #CREAR O ABRIR Likes
@@ -146,7 +146,13 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
         print("El archivo " + arFiReportes + " no existía y fue creado")
         arLoReportes = open(arFiReportes, "w+b")
         input()
-
+def cerrarArchivos():
+    arLoAlumnos.close()
+    arLoModeradores.close()
+    arLoAdmin.close()
+    arLoLikes.close()
+    arLoReportes.close()
+    input("Archivos cerrados. Finalizando programa...")
 def formatearAlumnos(alumnos):
     alumnos.id_est = str(alumnos.id_est).ljust(5, ' ')
     alumnos.email = str(alumnos.email).ljust(32, ' ')
@@ -355,6 +361,139 @@ def cambiarBiografia():
         #    arrayEstudiantes[id][5] = biografia
         #    cls()
         #    print("BIOGRAFIA ACTUALIZADA A: " + arrayEstudiantes[id][5])
+# def cambiarHobbies():
+#     alumno = Alumno()
+#     hobbies = "_"
 
-inicializar()
-cambiarBiografia()
+#     while hobbies != "":
+#         cls()
+#         print("HOBBIES ACTUALES: " + '"' + arrayEstudiantes[id][6] + '"')
+#         print("")
+#         hobbies = input("Ingrese sus nuevos hobbies, o Enter para salir: ")
+
+def registro():
+    cls()
+    alumno = Alumno()
+    
+    if os.path.getsize(arFiAlumnos) == 0:
+        alumno.id_est = 1
+    else:
+        arLoAlumnos.seek(0, 0)
+        alumno = pickle.load(arLoAlumnos)
+        tamReg = arLoAlumnos.tell()
+        tamArc = os.path.getsize(arFiAlumnos)
+
+        cantReg = tamArc//tamReg
+
+        alumno.id_est = cantReg + 1
+    
+    email = str(input("Ingrese correo electrónico (MAX. 32 Carac): \n"))
+    while len(email)>32:
+        cls()
+        print("MAXIMO 32 CARACTERES!")
+        email = str(input("Ingrese correo electrónico (MAX. 32 Carac): \n"))
+    if len(email) < 32:
+        alumno.email = email.ljust(32, ' ')
+    elif len(email) == 32:
+        alumno.email = email
+    
+    contraseña = getpass.getpass("Ingrese contraseña (MAX. 32 Carac): ")
+    while len(contraseña)>32:
+        cls()
+        print("MAXIMO 32 CARACTERES")
+        contraseña = getpass.getpass("Ingrese contraseña (MAX. 32 Carac): \n")
+    if len(contraseña)< 32:
+        alumno.contraseña = contraseña.ljust(32, ' ')
+    elif len(contraseña) == 32:
+        alumno.contraseña = contraseña
+    
+    nombre = str(input("Ingrese su nombre para finalizar el registro (MAX. 32 Carac):"))
+    while len(nombre)<= 2:
+        cls()
+        nombre = input("Su nombre debe tener minimo 3 caracteres, intente nuevamente:\n")
+    while len(nombre)>32:
+        cls()
+        print("MAXIMO 32 CARACTERES")
+        nombre = str(input("Ingrese contraseña (MAX. 32 Carac): \n"))
+    if len(nombre)< 32:
+        alumno.nombre = nombre.ljust(32, ' ')
+    elif len(nombre) == 32:
+        alumno.nombre = nombre
+
+    pickle.dump(alumno, arLoAlumnos)
+    print(alumno.email, alumno.nombre)
+    input()
+
+def login():
+    global id
+    global salir
+    global maxint
+    global arLoAlumnos  # Archivo global de alumnos
+    global arLoModeradores  # Archivo global de moderadores
+
+    maxint = 0
+    encontrado = False  # Variable para controlar si se encontró un usuario válido
+
+    while not encontrado and maxint < 3:
+        id = 0
+        cls()
+        print("*****  *****\n")
+        print("Si realizas 3 intentos incorrectos, el programa se cerrará.")
+        print(f"Intentos: {maxint}\n")
+        email = input("Ingrese correo electrónico: ")
+        contr = getpass.getpass("\nIngrese contraseña: ")
+
+        if email == "" or contr == "":
+            input("Ingrese un correo y contraseña válidos.\n")
+            maxint += 1
+        else:
+            # Variable para controlar si se encontró el alumno o moderador
+            usuario_encontrado = False
+
+            # 1. Leer archivo de alumnos
+            arLoAlumnos.seek(0, 0)  # Volver al inicio del archivo
+            while arLoAlumnos.tell() < os.path.getsize(arFiAlumnos) and not usuario_encontrado:
+                try:
+                    alumno = pickle.load(arLoAlumnos)
+                    if email == alumno.email.strip() and contr == alumno.contraseña.strip():
+                        usuario_encontrado = True
+                        encontrado = True
+                        if alumno.estado == True:
+                            cls()
+                            input(f"\n|Bienvenido {alumno.nombre}|\n")
+                            opcmenuEst()  # Función para menú de estudiantes
+                        else:
+                            cls()
+                            input("Usuario inactivo, intente nuevamente\nPresione enter para continuar:\n")
+                except EOFError:
+                    break  # Se alcanza el final del archivo de alumnos
+
+            # 2. Si no es alumno, buscar en archivo de moderadores
+            if not usuario_encontrado:
+                arLoModeradores.seek(0)  # Volver al inicio del archivo de moderadores
+                while arLoModeradores.tell() < os.path.getsize(arFiModeradores) and not usuario_encontrado:
+                    try:
+                        moderador = pickle.load(arLoModeradores)
+                        if email == moderador.email.strip() and contr == moderador.contraseña.strip():
+                            usuario_encontrado = True
+                            encontrado = True
+                            cls()
+                            input(f"\n|Bienvenido {moderador.nombre.strip()}|\n")
+                            opcmenuMod()  # Función para menú de moderadores
+                    except EOFError:
+                        break  # Se alcanza el final del archivo de moderadores
+
+            if not usuario_encontrado:  # Si no se encontró un usuario válido
+                input("Correo electrónico o contraseña inválidos, intente nuevamente:\n")
+                maxint += 1
+
+    # 3. Si se agotan los intentos
+    if maxint == 3:
+        cls()
+        print("Has agotado tus 3 intentos. El programa se cerrará.")
+        salir = "0"
+
+inicializarArchivos()
+# cambiarBiografia()
+inicio()
+cerrarArchivos()
