@@ -2,7 +2,7 @@ import pickle ; import os ; import os.path ; import datetime ; from datetime imp
 
 class Alumno:
     def __init__(self):
-        self.id_est = 0
+        self.id = 0
         self.email = " "
         self.contraseña = " "
         self.estado = True
@@ -12,17 +12,16 @@ class Alumno:
         self.hob = " "
         self.sexo = "N" 
 
-
 class Moderador:
     def __init__ (self):
-        self.id_mod = 0
+        self.id = 0
         self.email = " "
         self.contraseña = " "
         self.estado = True
         self.nombre = " "
 class Administrador:
     def __init__ (self):
-        self.id_adm = 0
+        self.id = 0
         self.email = " "
         self.contraseña = " "
         self.estado = True
@@ -54,7 +53,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         arLoAlumnos = open(arFiAlumnos, "w+b")
         #Alumno 1
         alumno = Alumno()
-        alumno.id_est = 1
+        alumno.id = 1
         alumno.email = "estudiante1@ayed.com"
         alumno.contraseña = "111222"
         alumno.estado = True
@@ -67,7 +66,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         pickle.dump(alumno, arLoAlumnos)
 
         #Alumno 2
-        alumno.id_est = 2
+        alumno.id = 2
         alumno.email = "estudiante2@ayed.com"
         alumno.contraseña = "333444"
         alumno.estado = True
@@ -80,7 +79,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         pickle.dump(alumno, arLoAlumnos)
 
         #Alumno 3
-        alumno.id_est = 3
+        alumno.id = 3
         alumno.email = "estudiante3@ayed.com"
         alumno.contraseña = "555666"
         alumno.estado = False
@@ -93,7 +92,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         pickle.dump(alumno, arLoAlumnos)
 
         #Alumno 4
-        alumno.id_est = 4
+        alumno.id = 4
         alumno.email = "estudiante4@ayed.com"
         alumno.contraseña = "777888"
         alumno.estado = True
@@ -115,7 +114,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         arLoModeradores = open(arFiModeradores, "w+b")
         #Alumno 1
         moderador = Moderador()
-        moderador.id_mod = 1
+        moderador.id = 1
         moderador.email = "moderador1@ayed.com"
         moderador.contraseña = "111222"
         moderador.estado = True
@@ -131,7 +130,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         print("El archivo " + arFiAdmin + " no existía y fue creado")
         arLoAdmin = open(arFiAdmin, "w+b")
         administrador = Administrador()
-        administrador.id_adm = 1
+        administrador.id = 1
         administrador.email = "admin1@ayed.com"
         administrador.contraseña = "111222"
         administrador.estado = True
@@ -162,7 +161,7 @@ def cerrarArchivos():
     arLoReportes.close()
     input("Archivos cerrados. Finalizando programa...")
 def formatearAlumnos(alumnos):
-    alumnos.id_est = str(alumnos.id_est).ljust(5, ' ')
+    alumnos.id = str(alumnos.id).ljust(5, ' ')
     alumnos.email = str(alumnos.email).ljust(32, ' ')
     alumnos.contraseña = str(alumnos.contraseña).ljust(32, ' ')
     alumnos.nombre = alumnos.nombre.ljust(32, ' ')
@@ -170,12 +169,12 @@ def formatearAlumnos(alumnos):
     alumnos.bio = alumnos.bio.ljust(255, ' ')
     alumnos.hob = alumnos.hob.ljust(255, ' ')
 def formatearModeradores(moderador):
-    moderador.id_mod = str(moderador.id_mod).ljust(5, ' ')
+    moderador.id = str(moderador.id).ljust(5, ' ')
     moderador.email = moderador.email.ljust(32, ' ')
     moderador.contraseña = moderador.contraseña.ljust(32, ' ')
     moderador.nombre = moderador.nombre.ljust(32, ' ')
 def formatearAdministradores(administrador):
-    administrador.id_adm = str(administrador.id_adm).ljust(5, ' ')
+    administrador.id = str(administrador.id).ljust(5, ' ')
     administrador.email = administrador.email.ljust(32, ' ')
     administrador.contraseña = administrador.contraseña.ljust(32, ' ')
 
@@ -492,7 +491,7 @@ def registro():
     alumno = Alumno()
     
     if os.path.getsize(arFiAlumnos) == 0:
-        alumno.id_est = 1
+        alumno.id = 1
     else:
         arLoAlumnos.seek(0, 0)
         alumno = pickle.load(arLoAlumnos)
@@ -501,13 +500,16 @@ def registro():
 
         cantReg = tamArc//tamReg
 
-        alumno.id_est = cantReg + 1
+        alumno.id = cantReg + 1
     
     email = str(input("Ingrese correo electrónico (MAX. 32 Carac): \n"))
     while len(email)>32:
         cls()
         print("MAXIMO 32 CARACTERES!")
         email = str(input("Ingrese correo electrónico (MAX. 32 Carac): \n"))
+    while len(email)< 12:
+        cls()
+        email = input("Su email debe tener minimo 12 caracteres, intente nuevamente:\n")    
     if len(email) < 32:
         alumno.email = email.ljust(32, ' ')
     elif len(email) == 32:
@@ -518,6 +520,9 @@ def registro():
         cls()
         print("MAXIMO 32 CARACTERES")
         contraseña = getpass.getpass("Ingrese contraseña (MAX. 32 Carac): \n")
+    while len(contraseña) < 8:
+        cls()
+        contraseña = input("Su contraseña debe tener minimo 8 caracteres, intente nuevamente: \n")
     if len(contraseña)< 32:
         alumno.contraseña = contraseña.ljust(32, ' ')
     elif len(contraseña) == 32:
@@ -535,6 +540,38 @@ def registro():
         alumno.nombre = nombre.ljust(32, ' ')
     elif len(nombre) == 32:
         alumno.nombre = nombre
+
+    fNacimiento = str(input("Ingrese su fecha de nacimiento (DD-MM-AAAA): "))
+    fechaval = True
+    while fechaval:
+        if fechaValida(fNacimiento):
+            cls()
+            fechaval=False
+        else:
+            print("Fecha ingresada no válida. Asegúrese de usar el formato DD-MM-AAAA, y una edad entre 18 y 122 años.")
+            fNacimiento = input("Ingrese su fecha de nacimiento (DD-MM-AAAA): ")     
+    alumno.fnac = fNacimiento
+
+    bio = str(input("Ingrese biografia (MAX. 255 Carac): \n"))
+    while len(bio)>255:
+        cls()
+        print("MAXIMO 255 CARACTERES")
+        bio = str(input("Ingrese biografia (MAX. 255 Carac): \n"))
+    if len(bio)<255:
+        alumno.bio = bio.ljust(255, ' ')
+    else:
+        alumno.bio = bio
+    
+    hob = str(input("Ingrese hobbies (MAX. 255 Carac): \n"))
+    while len(hob)>255:
+        cls()
+        print("MAXIMO 255 CARACTERES")
+        hob = str(input("Ingrese hobbies (MAX. 255 Carac): \n"))
+    if len(hob)<255:
+        alumno.hob = hob.ljust(255, ' ')
+    else:
+        alumno.hob = hob
+
 
     pickle.dump(alumno, arLoAlumnos)
     arLoAlumnos.flush()
@@ -626,6 +663,5 @@ def buscarSecuencial(email, contr, archivo, tipo_usuario):
     return usuario_encontrado  # Devuelve si se encontró el usuario o no
 
 inicializarArchivos()
-# cambiarBiografia()
 inicio()
 cerrarArchivos()
