@@ -12,7 +12,6 @@ class Alumno:
         self.hob = " "
         self.sexo = "N" 
 
-
 class Moderador:
     def __init__ (self):
         self.id = 0
@@ -593,6 +592,9 @@ def registro():
         cls()
         print("MAXIMO 32 CARACTERES!")
         email = str(input("Ingrese correo electrónico (MAX. 32 Carac): \n"))
+    while len(email)< 12:
+        cls()
+        email = input("Su email debe tener minimo 12 caracteres, intente nuevamente:\n")    
     if len(email) < 32:
         alumno.email = email.ljust(32, ' ')
     elif len(email) == 32:
@@ -603,6 +605,9 @@ def registro():
         cls()
         print("MAXIMO 32 CARACTERES")
         contraseña = getpass.getpass("Ingrese contraseña (MAX. 32 Carac): \n")
+    while len(contraseña) < 8:
+        cls()
+        contraseña = input("Su contraseña debe tener minimo 8 caracteres, intente nuevamente: \n")
     if len(contraseña)< 32:
         alumno.contraseña = contraseña.ljust(32, ' ')
     elif len(contraseña) == 32:
@@ -620,6 +625,38 @@ def registro():
         alumno.nombre = nombre.ljust(32, ' ')
     elif len(nombre) == 32:
         alumno.nombre = nombre
+
+    fNacimiento = str(input("Ingrese su fecha de nacimiento (DD-MM-AAAA): "))
+    fechaval = True
+    while fechaval:
+        if fechaValida(fNacimiento):
+            cls()
+            fechaval=False
+        else:
+            print("Fecha ingresada no válida. Asegúrese de usar el formato DD-MM-AAAA, y una edad entre 18 y 122 años.")
+            fNacimiento = input("Ingrese su fecha de nacimiento (DD-MM-AAAA): ")     
+    alumno.fnac = fNacimiento
+
+    bio = str(input("Ingrese biografia (MAX. 255 Carac): \n"))
+    while len(bio)>255:
+        cls()
+        print("MAXIMO 255 CARACTERES")
+        bio = str(input("Ingrese biografia (MAX. 255 Carac): \n"))
+    if len(bio)<255:
+        alumno.bio = bio.ljust(255, ' ')
+    else:
+        alumno.bio = bio
+    
+    hob = str(input("Ingrese hobbies (MAX. 255 Carac): \n"))
+    while len(hob)>255:
+        cls()
+        print("MAXIMO 255 CARACTERES")
+        hob = str(input("Ingrese hobbies (MAX. 255 Carac): \n"))
+    if len(hob)<255:
+        alumno.hob = hob.ljust(255, ' ')
+    else:
+        alumno.hob = hob
+
 
     pickle.dump(alumno, arLoAlumnos)
     arLoAlumnos.flush()
@@ -712,6 +749,5 @@ def buscarSecuencial(email, contr, archivo, tipo_usuario):
     return usuario_encontrado  # Devuelve si se encontró el usuario o no
 
 inicializarArchivos()
-# cambiarBiografia()
 inicio()
 cerrarArchivos()
