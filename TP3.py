@@ -486,6 +486,91 @@ def cambiarSexo():
         formatearAlumnos(alumno)
         pickle.dump(alumno,arLoAlumnos)
         arLoAlumnos.flush()
+def buscarLike(dador, receptor):
+    if os.path.getsize(arFiLikes) != 0:  # Si el archivo no está vacío
+        arLoLikes.seek(0, 0)  # Posicionamos el puntero al inicio del archivo
+        while arLoLikes.tell() < os.path.getsize(arFiLikes):
+            like = pickle.load(arLoLikes)  # Cargamos cada 'like' guardado
+            # Si encontramos un "like" donde el remitente y destinatario coinciden, retornamos True
+            if like.remitente == dador and like.destinatario == receptor:
+                return True
+    # Si no encontramos ninguna coincidencia después de revisar todo, retornamos False
+    return False
+
+def verCandidatos():
+    cls()
+    cantidadAlumnos = 0
+    like = Like()
+    print("***** LISTA DE CANDIDATOS *****\n")
+    
+    mostrarCandidatos()
+    
+    meGusta = input("\nIngrese el nombre o id del estudiante que le gustaría hacer un Matcheo, o presione Enter para salir: ")
+
+    # Contar la cantidad de alumnos
+    arLoAlumnos.seek(0, 0)  # Nos aseguramos de que el puntero esté al principio
+    while arLoAlumnos.tell() < os.path.getsize(arFiAlumnos):
+        alumno = pickle.load(arLoAlumnos)
+        cantidadAlumnos += 1
+
+    # Verificar que el nombre ingresado sea correcto
+    while meGusta != "":
+        encontrado = False
+        id_estudiante = None  # Inicializamos variable de control
+        
+        try:
+            meGustaID = int(meGusta)
+        except ValueError:
+            meGustaID = None
+
+        # Reposicionamos el puntero al inicio del archivo antes de cada búsqueda
+        arLoAlumnos.seek(0, 0)
+        
+        # Ciclo para recorrer los alumnos otra vez
+        for n in range(1, cantidadAlumnos + 1):  
+            if not encontrado:  # Solo procesar si no hemos encontrado aún
+                alumno = pickle.load(arLoAlumnos)  # Leer cada alumno desde el archivo
+                # Si el nombre o ID coinciden y el estado es True
+                if (alumno.nombre.strip().lower() == meGusta.lower() or n == meGustaID) and alumno.estado: 
+                    id_estudiante = alumno.id_est
+                    encontrado = True  # Marcamos que se ha encontrado el alumno
+
+        # Después del ciclo, si se encontró el alumno con estado True
+        if encontrado and id_estudiante is not None:
+            # Verificamos que el dador y el receptor no sean el mismo
+            if int(id) == int(id_estudiante):
+                print("No puedes dar like a ti mismo.")
+            else:
+                if buscarLike(id, id_estudiante):
+                    print(f"Usted ya le ha dado like a {alumno.nombre.strip()}")
+                else:
+                    print("")
+                    print(f"Le gustaría hacer un Matcheo con: {alumno.nombre.strip()}")
+                    # Guardar el like
+                    like.remitente = id
+                    like.destinatario = id_estudiante
+                    pickle.dump(like, arLoLikes)
+                    arLoLikes.flush()
+
+        else:
+            print("No se encontró el estudiante con ese nombre o ID, o el estudiante no está activo.")
+
+        # Pedir nueva entrada para otro estudiante o salir
+        meGusta = input("\nIngrese el nombre o id del estudiante que le gustaría hacer un Matcheo, o presione Enter para salir: ")
+
+def mostrarCandidatos():
+    cantidadAlumnos=1
+    arLoAlumnos.seek(0,0)
+    while arLoAlumnos.tell() < os.path.getsize(arFiAlumnos):
+        alumno=pickle.load(arLoAlumnos)
+        cantidadAlumnos+=1
+    arLoAlumnos.seek(0,0)
+    for i in range (1,cantidadAlumnos):
+        alumno=pickle.load(arLoAlumnos) 
+        if alumno.estado and i != id:
+            print(f"||Id:{i}||Nombre:{alumno.nombre.strip()}||Fecha de nacimiento:{alumno.fnac.strip()}||Edad:{calcularEdad(alumno.fnac.strip())}||Biografia:{alumno.bio.strip()}||Hobbies:{alumno.hob.strip()}||")
+        
+
 
 def registro():
     cls()
@@ -583,6 +668,7 @@ def login():
         salir = "0"
 
 def buscarSecuencial(email, contr, archivo, tipo_usuario):
+    global id
     archivo.seek(0, 0)  # Volver al inicio del archivo
     usuario_encontrado = False  # Controla si encontramos un usuario
     lectura_finalizada = False  # Controla si llegamos al final del archivo
@@ -598,7 +684,7 @@ def buscarSecuencial(email, contr, archivo, tipo_usuario):
                     if usuario.estado == True:
                         cls()
                         input(f"\n|Bienvenido {usuario.nombre.strip()} ({tipo_usuario})|\n")
-                        
+                        id=int(usuario.id_est)
                         if tipo_usuario == "alumno":
                             opcmenuEst()  # Función para menú de estudiantes
                         elif tipo_usuario == "moderador":
