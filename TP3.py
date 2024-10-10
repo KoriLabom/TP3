@@ -25,6 +25,8 @@ class Administrador:
         self.id_adm = 0
         self.email = " "
         self.contraseña = " "
+        self.estado = True
+        self.nombre = " "
 class Like: 
     def __init__ (self):
         self.remitente = 0
@@ -132,6 +134,8 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         administrador.id_adm = 1
         administrador.email = "admin1@ayed.com"
         administrador.contraseña = "111222"
+        administrador.estado = True
+        administrador.nombre = "Pato Martin"
         pickle.dump(administrador, arLoAdmin)
         input()
     
@@ -271,10 +275,9 @@ def menuModerador():
     print("*****  MENÚ MODERADOR *****\n")
     print("   1. Gestionar Usuarios")
     print("   2. Gestionar Reportes")
-    print("   3. Reportes Estadisticos")
-    print("   4. Bonus Track 1")
-    print("   5. Bonus Track 2")
-    print("   6. Bonus Track 3")
+    print("   3. Bonus Track 1")
+    print("   4. Bonus Track 2")
+    print("   5. Bonus Track 3")
     print("   0. Salir")
 def opcmenuMod():
     global maxint
@@ -282,15 +285,14 @@ def opcmenuMod():
     while(opc!= "0"):
         menuModerador()
         opc = input("\nIngrese una opción:  ")
-        while (opc<"0" or opc>"6"):
+        while (opc<"0" or opc>"5"):
             opc = input("ingreso inválido, ingrese otra opción: ")
         match opc:
             case "1": gestUsuarios()
             case "2": gestReportes()
-            case "3": repEstadisticos()
-            case "4": Bonustrack1()
-            case "5": Bonustrack2()
-            case "6": Bonustrack3()
+            case "3": Bonustrack1()
+            case "4": Bonustrack2()
+            case "5": Bonustrack3()
             case "0": maxint = 0
 def gestUsuarios():
     opc = ""
@@ -345,6 +347,29 @@ def inicio():
 def finPrograma():
     cls()
     print("GRACIAS POR USAR NUESTRO PROGRAMA")
+def menuAdmin():
+    cls()
+    print(" ***** MENÚ ADMIN *****\n")
+    print("   1. Gestionar Usuarios")
+    print("   2. Gestionar Reportes")
+    print("   3. Reportes Estadísticos")
+    print("   0. Salir")
+def opcmenuAdmin():
+    global maxint
+    opc = ""
+    while(opc!= "0"):
+        menuAdmin()
+        opc = input("\nIngrese una opción:  ")
+        while (opc<"0" or opc>"6"):
+            opc = input("ingreso inválido, ingrese otra opción: ")
+        match opc:
+            case "1": gestUsuarios()
+            case "2": gestReportes()
+            case "3": repEstadisticos()
+            case "4": Bonustrack1()
+            case "5": Bonustrack2()
+            case "6": Bonustrack3()
+            case "0": maxint = 0
 #FIN MENUS
 
 def fechaValida(fechastr:str)->bool:
@@ -461,6 +486,7 @@ def cambiarSexo():
         formatearAlumnos(alumno)
         pickle.dump(alumno,arLoAlumnos)
         arLoAlumnos.flush()
+
 def registro():
     cls()
     alumno = Alumno()
@@ -487,7 +513,7 @@ def registro():
     elif len(email) == 32:
         alumno.email = email
     
-    contraseña = getpass.getpass("Ingrese contraseña (MAX. 32 Carac): ")
+    contraseña = getpass.getpass("Ingrese contraseña (MAX. 32 Carac): \n")
     while len(contraseña)>32:
         cls()
         print("MAXIMO 32 CARACTERES")
@@ -497,29 +523,27 @@ def registro():
     elif len(contraseña) == 32:
         alumno.contraseña = contraseña
     
-    nombre = str(input("Ingrese su nombre para finalizar el registro (MAX. 32 Carac):"))
-    while len(nombre)<= 2:
+    nombre = str(input("Ingrese su nombre para finalizar el registro (MAX. 32 Carac): \n"))
+    while len(nombre)< 3:
         cls()
         nombre = input("Su nombre debe tener minimo 3 caracteres, intente nuevamente:\n")
     while len(nombre)>32:
         cls()
         print("MAXIMO 32 CARACTERES")
-        nombre = str(input("Ingrese contraseña (MAX. 32 Carac): \n"))
+        nombre = str(input("Ingrese nombre (MAX. 32 Carac): \n"))
     if len(nombre)< 32:
         alumno.nombre = nombre.ljust(32, ' ')
     elif len(nombre) == 32:
         alumno.nombre = nombre
 
     pickle.dump(alumno, arLoAlumnos)
+    arLoAlumnos.flush()
     print(alumno.email, alumno.nombre)
     input()
-
 def login():
     global id
     global salir
     global maxint
-    global arLoAlumnos  # Archivo global de alumnos
-    global arLoModeradores  # Archivo global de moderadores
 
     maxint = 0
     encontrado = False  # Variable para controlar si se encontró un usuario válido
@@ -537,45 +561,18 @@ def login():
             input("Ingrese un correo y contraseña válidos.\n")
             maxint += 1
         else:
-            # Variable para controlar si se encontró el alumno o moderador
-            usuario_encontrado = False
+            # Búsqueda secuencial en Alumnos
+            encontrado = buscarSecuencial(email, contr, arLoAlumnos, "alumno")
+            
+            # Si no se encontró en alumnos, buscar en Moderadores
+            if not encontrado:
+                encontrado = buscarSecuencial(email, contr, arLoModeradores, "moderador")
+            
+            # Si no se encontró en moderadores, buscar en Administradores
+            if not encontrado:
+                encontrado = buscarSecuencial(email, contr, arLoAdmin, "administrador")
 
-            # 1. Leer archivo de alumnos
-            arLoAlumnos.seek(0, 0)  # Volver al inicio del archivo
-            while arLoAlumnos.tell() < os.path.getsize(arFiAlumnos) and not usuario_encontrado:
-                try:
-                    alumno = pickle.load(arLoAlumnos)
-                    if email == alumno.email.strip() and contr == alumno.contraseña.strip():
-                        usuario_encontrado = True
-                        encontrado = True
-                        if alumno.estado == True:
-                            cls()
-                            input(f"\n|Bienvenido {alumno.nombre.strip()}|\n")
-                            opcmenuEst()  # Función para menú de estudiantes
-                        else:
-                            cls()
-                            input("Usuario inactivo, intente nuevamente\nPresione enter para continuar:\n")
-                    else:
-                        id+=1
-                except EOFError:
-                    break  # Se alcanza el final del archivo de alumnos
-
-            # 2. Si no es alumno, buscar en archivo de moderadores
-            if not usuario_encontrado:
-                arLoModeradores.seek(0)  # Volver al inicio del archivo de moderadores
-                while arLoModeradores.tell() < os.path.getsize(arFiModeradores) and not usuario_encontrado:
-                    try:
-                        moderador = pickle.load(arLoModeradores)
-                        if email == moderador.email.strip() and contr == moderador.contraseña.strip():
-                            usuario_encontrado = True
-                            encontrado = True
-                            cls()
-                            input(f"\n|Bienvenido {moderador.nombre.strip()}|\n")
-                            opcmenuMod()  # Función para menú de moderadores
-                    except EOFError:
-                        break  # Se alcanza el final del archivo de moderadores
-
-            if not usuario_encontrado:  # Si no se encontró un usuario válido
+            if not encontrado:  # Si no se encontró un usuario válido
                 input("Correo electrónico o contraseña inválidos, intente nuevamente:\n")
                 maxint += 1
 
@@ -584,6 +581,49 @@ def login():
         cls()
         print("Has agotado tus 3 intentos. El programa se cerrará.")
         salir = "0"
+
+def buscarSecuencial(email, contr, archivo, tipo_usuario):
+    archivo.seek(0, 0)  # Volver al inicio del archivo
+    usuario_encontrado = False  # Controla si encontramos un usuario
+    lectura_finalizada = False  # Controla si llegamos al final del archivo
+
+    while not usuario_encontrado and not lectura_finalizada:
+        try:
+            if archivo.tell() < os.path.getsize(archivo.name):  # Si no hemos llegado al final del archivo
+                usuario = pickle.load(archivo)  # Cargar el usuario actual
+
+                # Verificar si el email coincide
+                if usuario.email.strip() == email and usuario.contraseña.strip() == contr:
+                    # Verificar si el estado es activo
+                    if usuario.estado == True:
+                        cls()
+                        input(f"\n|Bienvenido {usuario.nombre.strip()} ({tipo_usuario})|\n")
+                        
+                        if tipo_usuario == "alumno":
+                            opcmenuEst()  # Función para menú de estudiantes
+                        elif tipo_usuario == "moderador":
+                            opcmenuMod()  # Función para menú de moderadores
+                        elif tipo_usuario == "administrador":
+                            opcmenuAdmin()  # Función para menú de administradores
+                        
+                        usuario_encontrado = True  # Usuario encontrado
+                    else:
+                        cls()
+                        input("Usuario inactivo, intente nuevamente\nPresione enter para continuar:\n")
+                        lectura_finalizada = True  # Detenemos la lectura ya que el usuario está inactivo
+                # Si el email no coincide, seguimos buscando
+            else:
+                lectura_finalizada = True  # Si llegamos al final del archivo
+        except EOFError:
+            lectura_finalizada = True  # Finalizamos si llegamos al final del archivo por un error
+        except pickle.UnpicklingError:
+            print("Error al cargar un registro, archivo corrupto o mal formado.")
+            lectura_finalizada = True  # Detenemos la lectura si hay un error de deserialización
+        except Exception as e:
+            print(f"Error inesperado: {e}")
+            lectura_finalizada = True  # Detenemos la lectura si hay otro error inesperado
+
+    return usuario_encontrado  # Devuelve si se encontró el usuario o no
 
 inicializarArchivos()
 # cambiarBiografia()
