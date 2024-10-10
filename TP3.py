@@ -6,7 +6,7 @@ from datetime import date
 import io
 
 class Alumno:
-    def __init__ (self):
+    def __init__(self):
         self.id_est = 0
         self.email = " "
         self.contraseña = " "
@@ -15,7 +15,9 @@ class Alumno:
         self.fnac = " "
         self.bio = " "
         self.hob = " "
-        self.sexo = " " 
+        self.sexo = "N" 
+
+
 class Moderador:
     def __init__ (self):
         self.id_mod = 0
@@ -37,7 +39,6 @@ class Reporte:
         self.id_reportante = 0
         self.id_reportado = 0
         self.razon_reporte = " "
-
 def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
     global arFiAlumnos, arLoAlumnos
     global arFiModeradores, arLoModeradores
@@ -48,6 +49,7 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
     arFiAlumnos = "alumnos.dat" #CREAR O ABRIR Alumnos
     if os.path.exists(arFiAlumnos):
         arLoAlumnos = open(arFiAlumnos, "r+b")
+
             
     else:
         print("El archivo " + arFiAlumnos + " no existía y fue creado")
@@ -102,6 +104,7 @@ def inicializar(): #Abre o Crea (si no existen) TODOS los archivos
         alumno.bio = "Estudiante de derecho."
         alumno.hob = "bailar, viajar"
         alumno.sexo = "M"
+        formatearAlumnos(alumno)
         pickle.dump(alumno, arLoAlumnos)
 
         input()
@@ -337,18 +340,24 @@ def cambiarBiografia():
     biografia = "_"
     while biografia != "":
         cls()
-        id=1
         arLoAlumnos.seek(0,0)
-        for i in range(id-1):
-            pickle.load(arLoAlumnos)
-        alumno = pickle.load(arLoAlumnos)
+        for i in range(0,id):
+            pos=arLoAlumnos.tell()
+            alumno=pickle.load(arLoAlumnos)
+
         print("BIOGRAFIA ACTUAL: " + '"' + alumno.bio + '"')
         print("")
         biografia = input("Ingrese su nueva biografía, o Enter para salir: ")
-        #if biografia != "":
-        #    arrayEstudiantes[id][5] = biografia
-        #    cls()
-        #    print("BIOGRAFIA ACTUALIZADA A: " + arrayEstudiantes[id][5])
+        if biografia != "":
+            cls()
+            arLoAlumnos.seek(pos,0)
+            alumno.bio=biografia
+            formatearAlumnos(alumno)
+            pickle.dump(alumno,arLoAlumnos)
+            arLoAlumnos.flush()
+            print("BIOGRAFIA ACTUALIZADA A: " + alumno.bio)
+            input()
 
 inicializar()
 cambiarBiografia()
+arLoAlumnos.close()
