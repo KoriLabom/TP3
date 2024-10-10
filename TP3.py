@@ -1,4 +1,4 @@
-import pickle ; import os ; import os.path ; import datetime ; from datetime import date ; import io ; import getpass
+import pickle ; import os ; import os.path ; import datetime ; from datetime import datetime, date ; import io ; import getpass
 
 class Alumno:
     def __init__(self):
@@ -362,6 +362,30 @@ def calcularEdad(fecha_nacimiento_str):
     if (fecha_actual.month, fecha_actual.day) < (fecha_nacimiento.month, fecha_nacimiento.day):
         edad -= 1
     return edad
+def fechaNac():
+    fNacimiento = "_"
+    while fNacimiento != "":
+        cls()
+        arLoAlumnos.seek(0,0)
+        for i in range(0,id):
+            pos=arLoAlumnos.tell()
+            alumno=pickle.load(arLoAlumnos)
+        print("FECHA DE NACIMIENTO ACTUAL: " + alumno.fnac.strip())
+        print("")
+        fNacimiento = input("Ingrese su nueva fecha de nacimiento (DD-MM-AAAA), o presione Enter para salir: ")
+        if fNacimiento != "":
+            if fechaValida(fNacimiento):
+                arLoAlumnos.seek(pos,0)
+                alumno.fnac = fNacimiento
+                formatearAlumnos(alumno)
+                pickle.dump(alumno,arLoAlumnos)
+                arLoAlumnos.flush()
+                cls()
+                print("FECHA ACTUALIZADA A: " + alumno.fnac.strip())
+                input("")
+            else:
+                print("Fecha ingresada no válida. Asegúrese de usar el formato DD-MM-AAAA, y una edad entre 18 y 122 años.")
+                input("Presione Enter para continuar\n")
 def cambiarBiografia():
     biografia = "_"
     while biografia != "":
@@ -373,7 +397,7 @@ def cambiarBiografia():
 
         print("BIOGRAFIA ACTUAL: " + '"' + alumno.bio.strip() + '"')
         print("")
-        biografia = input("Ingrese su nueva biografía, o Enter para salir: ")
+        biografia = input("Ingrese su nueva biografía, o presione Enter para salir: ")
         if biografia != "":
             cls()
             arLoAlumnos.seek(pos,0)
@@ -383,7 +407,57 @@ def cambiarBiografia():
             arLoAlumnos.flush()
             print("BIOGRAFIA ACTUALIZADA A: " + alumno.bio.strip())
             input()
+def cambiarHobbies():
+    hobbies = "_"
+    while hobbies != "":
+        cls()
+        arLoAlumnos.seek(0,0)
+        for i in range(0,id):
+            pos=arLoAlumnos.tell()
+            alumno=pickle.load(arLoAlumnos)
 
+        print("HOBBIES ACTUALES: " + '"' + alumno.hob.strip() + '"')
+        print("")
+        hobbies = input("Ingrese sus nuevos hobbies, o presione Enter para salir: ")
+        if hobbies != "":
+            cls()
+            arLoAlumnos.seek(pos,0)
+            alumno.hob=hobbies
+            formatearAlumnos(alumno)
+            pickle.dump(alumno,arLoAlumnos)
+            arLoAlumnos.flush()
+            print("HOBBIES ACTUALIZADOS A: " + alumno.hob.strip())
+            input()
+def cambiarSexo():
+    sexo = "_"
+    arLoAlumnos.seek(0,0)
+    for i in range(0,id):
+        pos=arLoAlumnos.tell()
+        alumno=pickle.load(arLoAlumnos)
+    while sexo != "":
+        cls()
+        if alumno.sexo == "H":
+            s="Hombre"
+        elif alumno.sexo == "M":
+            s="Mujer"
+        if alumno.sexo == "N":
+            s="No especificado"
+        print("SU SEXO ACTUAL ES: " + s)
+        print("   Cambiar sexo a: ")
+        print("   1. Hombre")
+        print("   2. Mujer")
+        print("   3. No especificar")
+        sexo = input("\nIngrese una opción, o Enter para volver: ")
+        if sexo == "1":
+            alumno.sexo = "H"
+        elif sexo == "2":
+            alumno.sexo = "M"
+        elif sexo == "3":
+            alumno.sexo = "N"
+        arLoAlumnos.seek(pos,0)
+        formatearAlumnos(alumno)
+        pickle.dump(alumno,arLoAlumnos)
+        arLoAlumnos.flush()
 def registro():
     cls()
     alumno = Alumno()
