@@ -342,6 +342,9 @@ def inicio():
                 case "1": login()                      
                 case "2": registro()                               
                 case "0": finPrograma()
+def finPrograma():
+    cls()
+    print("GRACIAS POR USAR NUESTRO PROGRAMA")
 #FIN MENUS
 
 def fechaValida(fechastr:str)->bool:
