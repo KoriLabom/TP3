@@ -592,7 +592,7 @@ def buscarLike(dador, receptor):
     return False
 def validarUsuario(idR, archivoEstudiantes):
     global idReportado
-    idActual = 0  # Contador para el ID actual en el archivo
+    idActual = 1  # Contador para el ID actual en el archivo
     encontrado = False  # Variable para controlar si se encuentra el usuario
 
     # Intentar convertir idR a un entero
@@ -751,25 +751,61 @@ def mostrarEstudiantes():
         if alumno.estado:
             print(f"||Id:{i}||Nombre:{alumno.nombre.strip()}||Fecha de nacimiento:{alumno.fnac.strip()}||Edad:{calcularEdad(alumno.fnac.strip())}||Biografia:{alumno.bio.strip()}||Hobbies:{alumno.hob.strip()}||")
 def mostrarReportes():
-    mostrarEstudiantes()
     idReporte=1
+    mostrarEstudiantes()
+    cantidadReportes=1
+    arLoReportes.seek(0,0)
+    while arLoReportes.tell() < os.path.getsize(arFiReportes):
+        reporte=pickle.load(arLoReportes)
+        cantidadReportes+=1
+    arLoReportes.seek(0,0)
     print("\n***** REPORTES *****\n")
-    for reporte in arrayReportes:
-        if reporte[3] == "0" and arrayEstudiantes[int(reporte[0])][2]=="Activo" and arrayEstudiantes[int(reporte[1])][2]=="Activo":
-            print(f"||Id Reporte: {idReporte}||Id reportante: {reporte[0]}||Id reportado: {reporte[1]}||Motivo del reporte: {reporte[2]}||Estado del reporte: {reporte[3]}||")
-        idReporte+=1
+    for i in range (1,cantidadReportes):
+        reporte=pickle.load(arLoReportes) 
+        if reporte.estado==0:
+            print(f"||Id Reporte: {idReporte}||Id reportante: {reporte.id_reportante}||Id reportado: {reporte.id_reportado}||Motivo del reporte: {reporte.razon_reporte.strip()}||Estado del reporte: {reporte.estado}||")
+            idReporte+=1
+   
 def reportes():
-    reporte=""
-    while reporte!="0":
+    cantRep=0
+    reporte=Reporte()
+    alumno=Alumno()
+    idreporte=-1
+    while idreporte!=0:
         cls()
         mostrarReportes()
-        reporte=input("\nIngrese el id del reporte que desea juzgar o 0 para volver: ")
-        while not "0" <= reporte <= "56":
+        arLoReportes.seek(0,0)
+        while arLoReportes.tell() < os.path.getsize(arFiReportes):
+                reporte = pickle.load(arLoReportes)
+                cantRep+=1
+        idreporte = input("\nIngrese el id del reporte que desea juzgar o 0 para volver: ")
+        es_entero = False
+
+        while not es_entero:
+            try:
+                idreporte = int(idreporte)
+                es_entero = True  # La condición se cumple si se puede convertir a entero
+            except ValueError:
+                idreporte = input("El valor ingresado no es un número entero. Por favor, inténtelo de nuevo: ")
+        
+        while not 0 <= idreporte <= cantRep:
             cls()
             mostrarReportes()
-            print("Ingrese el id del reporte que desea juzgar o 0 para volver: ")
-            reporte=input("El valor ingresado no es valido, ingrese otro: ")
-        if 1<= int(reporte) <=56 and arrayReportes[int(reporte)-1][3]=="0":
+            idreporte = input("\nIngrese el id del reporte que desea juzgar o 0 para volver: ")
+            es_entero = False
+            
+            while not es_entero:
+                try:
+                    idreporte = int(idreporte)
+                    es_entero = True  # La condición se cumple si se puede convertir a entero
+                except ValueError:
+                    idreporte = input("El valor ingresado no es un número entero. Por favor, inténtelo de nuevo: ")
+
+
+        if idreporte==0:
+            print("Volviendo al menu anterior")
+            input()
+        else:
             opc=""
             print("1.Ignorar reporte")
             print("2.Bloquear usuario reportado")
@@ -777,20 +813,33 @@ def reportes():
             opc=input("Como desea proceder con el reporte seleccionado?")
             while opc<"0" or opc>"2":
                 opc = input("Ingreso invalido, ingrese otra opción: ")
+            arLoReportes.seek(0)
+            input(idreporte)
+            for i in range(0,idreporte):
+                reporte = pickle.load(arLoReportes)
+                input("x")
             if opc=="1":
-                arrayReportes[int(reporte)-1][3]="2"
+                input("a")
+                reporte.estado=2
+                input("a")
+                pickle.dump(reporte, arLoReportes)
+                input("a")
+                arLoReportes.flush()
+                input("a")
             if opc=="2":
-                arrayEstudiantes[int(arrayReportes[int(reporte)-1][1])][2]="Inactivo"
-                arrayReportes[int(reporte)-1][3]="1"
+                idreportado=reporte.id_reportado
+                arLoAlumnos.seek(0,0)
+                for i in range(0,idreportado):
+                    alumno=pickle.load(arLoAlumnos)
+                alumno.estado=False
+                reporte.estado=1
+                pickle.dump(alumno, arLoAlumnos)
+                arLoAlumnos.flush()
+                pickle.dump(reporte, arLoReportes)
+                arLoReportes.flush()
             if opc=="0":
                 print("Regresando al menu anterior")
-                input()
-        elif reporte=="0":
-            print("Volviendo al menu anterior")
-            input()
-        else:
-            print("El id del reporte no existe")
-            input()      
+                input()    
 
 
 def registro():
