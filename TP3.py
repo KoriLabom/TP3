@@ -267,6 +267,7 @@ def gestCandidatos(): #GESTIONAR CANDIDATOS
             case "2": reportarCandidato()
 def matcheos():
     cls()
+    print("***** MATCHEOS *****\n")
     input("En Construcción...")
 def menuReportar():
     cls()
@@ -312,6 +313,69 @@ def menuGestUsuarios():
     print("***** GESTIONAR USUARIOS *****\n")
     print("   1. Desactivar usuario")
     print("   0. Volver")
+def desactivarUsua():
+    global opcE, opcsubp
+    cls()
+    opcion = " "
+    # Mostrar todos los usuarios activos
+    
+    arLoAlumnos.seek(0, 0)  # Ir al inicio del archivo
+
+    # Mostrar todos los alumnos activos en la lista
+    while opcion != "":
+        cls()
+        print("***** DESACTIVAR USUARIO *****\n")
+        print("Lista de usuarios:")
+        try:
+            while arLoAlumnos.tell() < os.path.getsize(arFiAlumnos):
+                alumno = pickle.load(arLoAlumnos)
+                if alumno.estado == True:  # Mostrar solo usuarios activos
+                    print(f"ID: {alumno.id.strip()} | Nombre: {alumno.nombre.strip()} | Email: {alumno.email.strip()} | ")
+        except EOFError:
+            pass  # Final del archivo
+
+        # Pedir al moderador que ingrese un ID, nombre o presione Enter para volver
+        opcion = input("\nIngrese el ID o Nombre del usuario para desactivar, o presione Enter para volver: ")
+        
+        
+        # Volver a buscar el usuario por ID o nombre, sin usar listas ni break
+        usuario_encontrado = False
+        arLoAlumnos.seek(0, 0)  # Volver al inicio del archivo
+
+        try:
+            while arLoAlumnos.tell() < os.path.getsize(arFiAlumnos) and not usuario_encontrado:
+                pos = arLoAlumnos.tell()  # Guardar la posición actual
+                alumno = pickle.load(arLoAlumnos)
+
+                # Compara ID o nombre
+                if str(alumno.id.strip()) == opcion or alumno.nombre.strip().lower() == opcion.lower():
+                    usuario_encontrado = True
+
+                    # Confirmación de desactivación
+                    print(f"\n¿Está seguro que desea desactivar el perfil de {alumno.nombre.strip()}?")
+                    print(" 1. Desactivar")
+                    print(" 0. Cancelar")
+                    opc = input("\nIngrese una opción: ")
+                    while opc not in ["0", "1"]:
+                        opc = input("Ingreso inválido, ingrese otra opción: ")
+                    
+                    if opc == "1":
+                        # Desactivar el usuario
+                        arLoAlumnos.seek(pos, 0)  # Volver a la posición del usuario
+                        alumno.estado = False  # Desactivar el alumno
+                        formatearAlumnos(alumno)
+                        pickle.dump(alumno, arLoAlumnos)
+                        arLoAlumnos.flush()  # Asegurar que se guarda el cambio
+                        print(f"\nEl usuario {alumno.nombre.strip()} ha sido desactivado correctamente!")
+                        input("Presione Enter para continuar...")
+                    else:
+                        print("Operación cancelada.")
+        except EOFError:
+            pass  # Final del archivo
+
+        if opcion != "" and not usuario_encontrado:
+            print("Usuario no encontrado.")
+            input("Presione Enter para continuar...")
 def gestReportes():
     opc = ""
     while(opc!="0"):
@@ -798,8 +862,11 @@ def registro():
         cantReg = tamArc // tamReg  # División entera para saber cuántos registros hay
 
         # El ID del nuevo alumno será la cantidad de registros + 1
-        alumno.id = cantReg + 2
-
+        id_alum = str(cantReg + 2)
+        if len(id_alum)<5:
+            alumno.id = str(id_alum.ljust(5, ' '))
+        else:
+            alumno.id = id_alum
         # Mover el puntero al final del archivo para agregar el nuevo alumno
         arLoAlumnos.seek(0, 2)
     
@@ -934,7 +1001,7 @@ def buscarSecuencial(email, contr, archivo, tipo_usuario):
                     if usuario.estado == True:
                         cls()
                         input(f"\n|Bienvenido {usuario.nombre.strip()} ({tipo_usuario})|\n")
-                        id=int(usuario.id)
+                        id = int(usuario.id)
                         if tipo_usuario == "alumno":
                             opcmenuEst()  # Función para menú de estudiantes
                         elif tipo_usuario == "moderador":
@@ -944,9 +1011,8 @@ def buscarSecuencial(email, contr, archivo, tipo_usuario):
                         
                         usuario_encontrado = True  # Usuario encontrado
                     else:
-                        cls()
-                        input("Usuario inactivo, intente nuevamente\nPresione enter para continuar:\n")
-                        lectura_finalizada = True  # Detenemos la lectura ya que el usuario está inactivo
+                        print(f"El usuario {usuario.nombre.strip()} está inactivo.")
+                        input("Presione Enter para continuar...\n")
                 # Si el email no coincide, seguimos buscando
             else:
                 lectura_finalizada = True  # Si llegamos al final del archivo
@@ -959,7 +1025,7 @@ def buscarSecuencial(email, contr, archivo, tipo_usuario):
             print(f"Error inesperado: {e}")
             lectura_finalizada = True  # Detenemos la lectura si hay otro error inesperado
 
-    return usuario_encontrado  # Devuelve si se encontró el usuario o no
+    return usuario_encontrado  # Devuelve si se encontró el usuario o no1
 
 inicializarArchivos()
 inicio()
