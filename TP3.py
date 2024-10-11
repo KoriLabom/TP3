@@ -376,6 +376,7 @@ def opcmenuAdmin():
             case "0": maxint = 0
 #FIN MENUS
 
+#Funciones estudiantes
 def fechaValida(fechastr:str)->bool:
     try:
         fechanac = datetime.strptime(fechastr, '%d-%m-%Y').date()
@@ -526,7 +527,6 @@ def buscarLike(dador, receptor):
                 return True
     # Si no encontramos ninguna coincidencia después de revisar todo, retornamos False
     return False
-
 def validarUsuario(idR, archivoEstudiantes):
     global idReportado
     idActual = 0  # Contador para el ID actual en el archivo
@@ -563,7 +563,6 @@ def validarUsuario(idR, archivoEstudiantes):
         idActual += 1
 
     return encontrado
-
 def reportarCandidato():
     global motivo, idReportado, id
     idReportado = " "
@@ -603,8 +602,6 @@ def reportarCandidato():
                 menuReportar()
                 print("\nIngrese el ID/Nombre del usuario que desea reportar o Enter para salir: ")
                 idReportado = input("\nEl usuario que desea reportar no se encuentra activo o no existe. Por favor, intente de nuevo: ")
-
-
 def verCandidatos():
     cls()
     cantidadAlumnos = 0
@@ -665,7 +662,6 @@ def verCandidatos():
 
         # Pedir nueva entrada para otro estudiante o salir
         meGusta = input("\nIngrese el nombre o id del estudiante que le gustaría hacer un Matcheo, o presione Enter para salir: ")
-
 def mostrarCandidatos():
     cantidadAlumnos=1
     arLoAlumnos.seek(0,0)
@@ -677,7 +673,61 @@ def mostrarCandidatos():
         alumno=pickle.load(arLoAlumnos) 
         if alumno.estado and i != id:
             print(f"||Id:{i}||Nombre:{alumno.nombre.strip()}||Fecha de nacimiento:{alumno.fnac.strip()}||Edad:{calcularEdad(alumno.fnac.strip())}||Biografia:{alumno.bio.strip()}||Hobbies:{alumno.hob.strip()}||")
-        
+#
+
+#funciones Moderadores
+def mostrarEstudiantes():
+    cantidadAlumnos=1
+    arLoAlumnos.seek(0,0)
+    while arLoAlumnos.tell() < os.path.getsize(arFiAlumnos):
+        alumno=pickle.load(arLoAlumnos)
+        cantidadAlumnos+=1
+    arLoAlumnos.seek(0,0)
+    for i in range (1,cantidadAlumnos):
+        alumno=pickle.load(arLoAlumnos) 
+        if alumno.estado:
+            print(f"||Id:{i}||Nombre:{alumno.nombre.strip()}||Fecha de nacimiento:{alumno.fnac.strip()}||Edad:{calcularEdad(alumno.fnac.strip())}||Biografia:{alumno.bio.strip()}||Hobbies:{alumno.hob.strip()}||")
+def mostrarReportes():
+    mostrarEstudiantes()
+    idReporte=1
+    print("\n***** REPORTES *****\n")
+    for reporte in arrayReportes:
+        if reporte[3] == "0" and arrayEstudiantes[int(reporte[0])][2]=="Activo" and arrayEstudiantes[int(reporte[1])][2]=="Activo":
+            print(f"||Id Reporte: {idReporte}||Id reportante: {reporte[0]}||Id reportado: {reporte[1]}||Motivo del reporte: {reporte[2]}||Estado del reporte: {reporte[3]}||")
+        idReporte+=1
+def reportes():
+    reporte=""
+    while reporte!="0":
+        cls()
+        mostrarReportes()
+        reporte=input("\nIngrese el id del reporte que desea juzgar o 0 para volver: ")
+        while not "0" <= reporte <= "56":
+            cls()
+            mostrarReportes()
+            print("Ingrese el id del reporte que desea juzgar o 0 para volver: ")
+            reporte=input("El valor ingresado no es valido, ingrese otro: ")
+        if 1<= int(reporte) <=56 and arrayReportes[int(reporte)-1][3]=="0":
+            opc=""
+            print("1.Ignorar reporte")
+            print("2.Bloquear usuario reportado")
+            print("0.Volver")
+            opc=input("Como desea proceder con el reporte seleccionado?")
+            while opc<"0" or opc>"2":
+                opc = input("Ingreso invalido, ingrese otra opción: ")
+            if opc=="1":
+                arrayReportes[int(reporte)-1][3]="2"
+            if opc=="2":
+                arrayEstudiantes[int(arrayReportes[int(reporte)-1][1])][2]="Inactivo"
+                arrayReportes[int(reporte)-1][3]="1"
+            if opc=="0":
+                print("Regresando al menu anterior")
+                input()
+        elif reporte=="0":
+            print("Volviendo al menu anterior")
+            input()
+        else:
+            print("El id del reporte no existe")
+            input()      
 
 
 def registro():
