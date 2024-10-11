@@ -153,6 +153,10 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         print("El archivo " + arFiReportes + " no existía y fue creado")
         arLoReportes = open(arFiReportes, "w+b")
         input()
+    
+    arLoAlumnos.flush()
+    arLoModeradores.flush()
+    arLoAdmin.flush()
 def cerrarArchivos():
     arLoAlumnos.close()
     arLoModeradores.close()
@@ -262,7 +266,7 @@ def gestCandidatos(): #GESTIONAR CANDIDATOS
             case "2": reportarCandidato()
 def matcheos():
     cls()
-    print("NO SE HACE")
+    input("En Construcción...")
 def menuReportar():
     cls()
     mostrarCandidatos()
@@ -604,14 +608,22 @@ def registro():
     if os.path.getsize(arFiAlumnos) == 0:
         alumno.id = 1
     else:
+        # Vamos al inicio del archivo
         arLoAlumnos.seek(0, 0)
+
+        # Leer el primer registro para calcular el tamaño de cada registro
         alumno = pickle.load(arLoAlumnos)
-        tamReg = arLoAlumnos.tell()
-        tamArc = os.path.getsize(arFiAlumnos)
+        tamReg = arLoAlumnos.tell()  # Tamaño de un registro
+        tamArc = os.path.getsize(arFiAlumnos)  # Tamaño total del archivo
 
-        cantReg = tamArc//tamReg
+        # Calcular la cantidad de registros
+        cantReg = tamArc // tamReg  # División entera para saber cuántos registros hay
 
-        alumno.id = cantReg + 1
+        # El ID del nuevo alumno será la cantidad de registros + 1
+        alumno.id = cantReg + 2
+
+        # Mover el puntero al final del archivo para agregar el nuevo alumno
+        arLoAlumnos.seek(0, 2)
     
     email = str(input("Ingrese correo electrónico (MAX. 32 Carac): \n"))
     while len(email)>32:
@@ -686,8 +698,7 @@ def registro():
 
     pickle.dump(alumno, arLoAlumnos)
     arLoAlumnos.flush()
-    print(alumno.email, alumno.nombre)
-    input()
+    input("Registro existoso, presione Enter para continuar...")
 def login():
     global id
     global salir
@@ -697,7 +708,6 @@ def login():
     encontrado = False  # Variable para controlar si se encontró un usuario válido
 
     while not encontrado and maxint < 3:
-        id = 1
         cls()
         print("*****  *****\n")
         print("Si realizas 3 intentos incorrectos, el programa se cerrará.")
@@ -723,7 +733,6 @@ def login():
             if not encontrado:  # Si no se encontró un usuario válido
                 input("Correo electrónico o contraseña inválidos, intente nuevamente:\n")
                 maxint += 1
-
     # 3. Si se agotan los intentos
     if maxint == 3:
         cls()
