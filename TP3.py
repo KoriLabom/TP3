@@ -35,6 +35,7 @@ class Reporte:
         self.id_reportante = 0
         self.id_reportado = 0
         self.razon_reporte = " "
+        self.estado = 0
 
 def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
     global arFiAlumnos, arLoAlumnos
@@ -525,6 +526,84 @@ def buscarLike(dador, receptor):
                 return True
     # Si no encontramos ninguna coincidencia después de revisar todo, retornamos False
     return False
+
+def validarUsuario(idR, archivoEstudiantes):
+    global idReportado
+    idActual = 0  # Contador para el ID actual en el archivo
+    encontrado = False  # Variable para controlar si se encuentra el usuario
+
+    # Intentar convertir idR a un entero
+    try:
+        idR_int = int(idR)
+    except ValueError:
+        idR_int = None
+
+    # Reposicionar el archivo al principio
+    archivoEstudiantes.seek(0, 0)
+
+    # Leer los estudiantes del archivo
+    while archivoEstudiantes.tell() < os.path.getsize(archivoEstudiantes.name):
+        try:
+            estudiante = pickle.load(archivoEstudiantes)  # Cargar cada estudiante del archivo
+            
+            # Verificar si el id o nombre coinciden y si el estado es "Activo"
+            if (idR_int == idActual or idR.lower() == estudiante.nombre.strip().lower()) and estudiante.estado:
+                idReportado = idActual
+                encontrado = True
+                break  # Detener la búsqueda si encontramos el estudiante correcto
+        except EOFError:
+            break  # Finalizamos si llegamos al final del archivo
+        except pickle.UnpicklingError:
+            print("Error al deserializar el archivo.")
+            break  # Detenemos la lectura si hay un error de deserialización
+        except Exception as e:
+            print(f"Error inesperado: {e}")
+            break  # Detenemos la lectura si hay otro error inesperado
+        
+        idActual += 1
+
+    return encontrado
+
+def reportarCandidato():
+    global motivo, idReportado, id
+    idReportado = " "
+    motivo = ""
+    opc = ''
+    reporte=Reporte()
+    while opc!="n" and opc != 's' and idReportado != "":
+        cls()
+        menuReportar()
+        idReportado = input("\nIngrese el ID/Nombre del usuario que desea reportar o Enter para salir: ")        
+        while opc!="n" and opc!="s" and idReportado != "":
+            if validarUsuario(idReportado, arLoAlumnos):
+                cls()
+                menuReportar()
+                arLoAlumnos.seek(0,0)
+                for i in range(0,id):
+                    alumno=pickle.load(arLoAlumnos)
+                if idReportado == id or idReportado==alumno.nombre:
+                    idReportado=input("No te puedes reportar a ti mismo! Ingrese otro ID/Nombre del usuario: ")
+                else:
+                    motivo = input("\nIngrese el Motivo del reporte: ")
+                    opc = input("¿Desea guardar y enviar el reporte? (s/n): ")
+                    while opc != 's' and opc != 'n':
+                        opc = input("Respuesta inválida. ¿Desea guardar y enviar el reporte? (s/n): ")
+                    if opc == "s":
+                        tamReg = os.path.getsize(arFiLikes)
+                        arLoReportes.seek(tamReg,0)
+                        reporte.id_reportado = idReportado
+                        reporte.id_reportante = id
+                        reporte.razon_reporte = motivo
+                        reporte.estado = 0
+                        pickle.dump(reporte, arLoReportes)
+                        arLoReportes.flush()
+
+            else:
+                cls()
+                menuReportar()
+                print("\nIngrese el ID/Nombre del usuario que desea reportar o Enter para salir: ")
+                idReportado = input("\nEl usuario que desea reportar no se encuentra activo o no existe. Por favor, intente de nuevo: ")
+
 
 def verCandidatos():
     cls()
