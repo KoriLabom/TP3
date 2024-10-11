@@ -326,11 +326,10 @@ def desactivarUsua():
         cls()
         print("***** DESACTIVAR USUARIO *****\n")
         print("Lista de usuarios:")
+        mostrarEstudiantes()
         try:
             while arLoAlumnos.tell() < os.path.getsize(arFiAlumnos):
                 alumno = pickle.load(arLoAlumnos)
-                if alumno.estado == True:  # Mostrar solo usuarios activos
-                    print(f"ID: {alumno.id.strip()} | Nombre: {alumno.nombre.strip()} | Email: {alumno.email.strip()} | ")
         except EOFError:
             pass  # Final del archivo
 
@@ -797,104 +796,132 @@ def reportes():
 def registro():
     cls()
     alumno = Alumno()
-    
+
     if os.path.getsize(arFiAlumnos) == 0:
         alumno.id = 1
     else:
-        # Vamos al inicio del archivo
         arLoAlumnos.seek(0, 0)
 
-        # Leer el primer registro para calcular el tamaño de cada registro
+        # Calcular tamaño del registro
         alumno = pickle.load(arLoAlumnos)
-        tamReg = arLoAlumnos.tell()  # Tamaño de un registro
-        tamArc = os.path.getsize(arFiAlumnos)  # Tamaño total del archivo
+        tamReg = arLoAlumnos.tell()
+        tamArc = os.path.getsize(arFiAlumnos)
 
-        # Calcular la cantidad de registros
-        cantReg = tamArc // tamReg  # División entera para saber cuántos registros hay
+        # Cantidad de registros
+        cantReg = tamArc // tamReg
 
-        # El ID del nuevo alumno será la cantidad de registros + 1
         id_alum = str(cantReg + 2)
-        if len(id_alum)<5:
+        if len(id_alum) < 5:
             alumno.id = str(id_alum.ljust(5, ' '))
         else:
             alumno.id = id_alum
-        # Mover el puntero al final del archivo para agregar el nuevo alumno
-        arLoAlumnos.seek(0, 2)
-    
-    email = str(input("Ingrese correo electrónico (MAX. 32 Carac): \n"))
-    while len(email)>32:
-        cls()
-        print("MAXIMO 32 CARACTERES!")
+        
+        arLoAlumnos.seek(0, 2)  # Mover el puntero al final del archivo para agregar un nuevo registro
+
+    # Verificar si el email ya está registrado en Alumnos, Moderadores, o Administradores
+    email_valido = False
+    while not email_valido:
         email = str(input("Ingrese correo electrónico (MAX. 32 Carac): \n"))
-    while len(email)< 12:
-        cls()
-        email = input("Su email debe tener minimo 12 caracteres, intente nuevamente:\n")    
+        
+        while len(email) > 32:
+            cls()
+            print("MAXIMO 32 CARACTERES!")
+            email = str(input("Ingrese correo electrónico (MAX. 32 Carac): \n"))
+        while len(email) < 12:
+            cls()
+            email = input("Su email debe tener mínimo 12 caracteres, intente nuevamente:\n")
+
+        # Comprobar el email en el archivo de Alumnos
+        encontrado = buscarMailRep(email, arLoAlumnos)
+
+        # Si no se encuentra en Alumnos, buscar en Moderadores
+        if encontrado == 1:
+            encontrado = buscarMailRep(email, arLoModeradores)
+
+        # Si no se encuentra en Moderadores, buscar en Administradores
+        if encontrado == 1:
+            encontrado = buscarMailRep(email, arLoAdmin)
+
+        # Si el email no se encuentra en ninguno de los archivos, es válido
+        if encontrado == 1:
+            email_valido = True
+        else:
+            cls()
+            print("El email ya está registrado como alumno, moderador o administrador. Ingrese uno nuevo.")
+
+    # Guardar el email en el registro
     if len(email) < 32:
         alumno.email = email.ljust(32, ' ')
     elif len(email) == 32:
         alumno.email = email
-    
+
+    # Solicitar y validar la contraseña
     contraseña = getpass.getpass("Ingrese contraseña (MAX. 32 Carac): \n")
-    while len(contraseña)>32:
+    while len(contraseña) > 32:
         cls()
         print("MAXIMO 32 CARACTERES")
         contraseña = getpass.getpass("Ingrese contraseña (MAX. 32 Carac): \n")
     while len(contraseña) < 8:
         cls()
-        contraseña = input("Su contraseña debe tener minimo 8 caracteres, intente nuevamente: \n")
-    if len(contraseña)< 32:
+        contraseña = input("Su contraseña debe tener mínimo 8 caracteres, intente nuevamente: \n")
+    if len(contraseña) < 32:
         alumno.contraseña = contraseña.ljust(32, ' ')
     elif len(contraseña) == 32:
         alumno.contraseña = contraseña
-    
+
+    # Recolectar otros datos
     nombre = str(input("Ingrese su nombre para finalizar el registro (MAX. 32 Carac): \n"))
-    while len(nombre)< 3:
+    while len(nombre) < 3:
         cls()
-        nombre = input("Su nombre debe tener minimo 3 caracteres, intente nuevamente:\n")
-    while len(nombre)>32:
+        nombre = input("Su nombre debe tener mínimo 3 caracteres, intente nuevamente:\n")
+    while len(nombre) > 32:
         cls()
         print("MAXIMO 32 CARACTERES")
         nombre = str(input("Ingrese nombre (MAX. 32 Carac): \n"))
-    if len(nombre)< 32:
+    if len(nombre) < 32:
         alumno.nombre = nombre.ljust(32, ' ')
     elif len(nombre) == 32:
         alumno.nombre = nombre
 
+    # Fecha de nacimiento
     fNacimiento = str(input("Ingrese su fecha de nacimiento (DD-MM-AAAA): "))
     fechaval = True
     while fechaval:
         if fechaValida(fNacimiento):
             cls()
-            fechaval=False
+            fechaval = False
         else:
             print("Fecha ingresada no válida. Asegúrese de usar el formato DD-MM-AAAA, y una edad entre 18 y 122 años.")
             fNacimiento = input("Ingrese su fecha de nacimiento (DD-MM-AAAA): ")     
     alumno.fnac = fNacimiento
 
-    bio = str(input("Ingrese biografia (MAX. 255 Carac): \n"))
-    while len(bio)>255:
+    # Biografía
+    bio = str(input("Ingrese biografía (MAX. 255 Carac): \n"))
+    while len(bio) > 255:
         cls()
         print("MAXIMO 255 CARACTERES")
-        bio = str(input("Ingrese biografia (MAX. 255 Carac): \n"))
-    if len(bio)<255:
+        bio = str(input("Ingrese biografía (MAX. 255 Carac): \n"))
+    if len(bio) < 255:
         alumno.bio = bio.ljust(255, ' ')
     else:
         alumno.bio = bio
     
+    # Hobbies
     hob = str(input("Ingrese hobbies (MAX. 255 Carac): \n"))
-    while len(hob)>255:
+    while len(hob) > 255:
         cls()
         print("MAXIMO 255 CARACTERES")
         hob = str(input("Ingrese hobbies (MAX. 255 Carac): \n"))
-    if len(hob)<255:
+    if len(hob) < 255:
         alumno.hob = hob.ljust(255, ' ')
     else:
         alumno.hob = hob
 
-
+    # Guardar el nuevo registro en el archivo
     pickle.dump(alumno, arLoAlumnos)
     arLoAlumnos.flush()
-    input("Registro existoso, presione Enter para continuar...")
+    input("Registro exitoso, presione Enter para continuar...")
+
 def login():
     global id
     global salir
@@ -977,7 +1004,33 @@ def buscarSecuencial(email, contr, archivo, tipo_usuario):
             lectura_finalizada = True  # Detenemos la lectura si hay otro error inesperado
 
     return usuario_encontrado  # Devuelve si se encontró el usuario o no1
+def buscarMailRep(email, archivo):
+    archivo.seek(0, 0)  # Volver al inicio del archivo
+    lectura_finalizada = False  # Controla si llegamos al final del archivo
 
+    try:
+        while not lectura_finalizada:
+            if archivo.tell() < os.path.getsize(archivo.name):  # Si no hemos llegado al final del archivo
+                usuario = pickle.load(archivo)  # Cargar el usuario actual
+
+                # Verificar si el email coincide
+                if usuario.email.strip() == email:
+                    # Verificar si el estado es activo
+                    if usuario.estado == True:
+                        print(f"El Email {usuario.email.strip()} ya está registrado, intente con otro.\n")
+                        input("Presione Enter para continuar...")
+                        return -1
+                    else:
+                        print(f"El Email {usuario.email.strip()} está inactivo, intente con otro.\n")
+                        input("Presione Enter para continuar...")
+                        return -1
+            else:
+                lectura_finalizada = True  # Si llegamos al final del archivo
+    except EOFError:
+        lectura_finalizada = True  # Finalizamos si llegamos al final del archivo
+
+    # Si no se encontró el email en todo el archivo, significa que está disponible
+    return 1
 inicializarArchivos()
 inicio()
 cerrarArchivos()
