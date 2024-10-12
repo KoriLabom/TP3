@@ -708,10 +708,8 @@ def verCandidatos():
                     like.remitente = id
                     like.destinatario = id_estudiante
                     arLoLikes.seek(0, 2)
-                    input(os.path.getsize(arFiLikes))
                     pickle.dump(like, arLoLikes)
                     arLoLikes.flush()
-                    input(os.path.getsize(arFiLikes))
 
         else:
             print("No se encontró el estudiante con ese nombre o ID, o el estudiante no está activo.")
@@ -720,7 +718,9 @@ def verCandidatos():
         meGusta = input("\nIngrese el nombre o id del estudiante que le gustaría hacer un Matcheo, o presione Enter para salir: ")
 
 def verificarMatch(remitente, destinatario):
+    like = Like()
     encontrado = False
+    pos = arLoLikes.tell()
     arLoLikes.seek(0, 0)
     
     while arLoLikes.tell() < os.path.getsize(arFiLikes) and not encontrado:
@@ -729,7 +729,7 @@ def verificarMatch(remitente, destinatario):
         # Si el destinatario coincide con el remitente en el like
         if like.remitente == destinatario and like.destinatario == remitente:
             encontrado = True  # Se encontró un match
-        
+    arLoLikes.seek(pos, 0)
     return encontrado
 
 def reportesEstadisticos():
@@ -744,31 +744,23 @@ def reportesEstadisticos():
     arLoLikes.seek(0, 0)
     while arLoLikes.tell() < os.path.getsize(arFiLikes):
         like = pickle.load(arLoLikes)
-        print(os.path.getsize(arFiLikes))
-        print(arLoLikes.tell())
-        input("x")
         
         # Si el remitente es el usuario actual (id), es un like que diste
         if like.remitente == id:
             totalCandidatos += 1
-            input("primer if")
             if not verificarMatch(like.remitente, like.destinatario):
                 likesDadosNoDevueltos += 1  # Aumentar el contador de likes dados y no recibidos
-                input("segundo if")
             else:
                 matcheos += 1  # Si hay match, aumentar el contador de matcheos
-                input("primer else")
         
         # Si el destinatario es el usuario actual (id), es un like que recibiste
         elif like.destinatario == id:
-            input("primer elif")
             if not verificarMatch(like.remitente, like.destinatario):
-                input("elif if")
                 likesRecibidosNoDevueltos += 1  # Aumentar el contador de likes recibidos y no respondidos
-
+    
     # Calcular el porcentaje de matcheos
     if totalCandidatos > 0:
-        probabilidad = (matcheos / totalCandidatos) * 100
+        probabilidad = (matcheos // totalCandidatos) * 100
     else:
         probabilidad = 0  # Si no hay candidatos, la probabilidad es 0
 
