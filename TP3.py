@@ -346,7 +346,7 @@ def desactivarUsua():
                 alumno = pickle.load(arLoAlumnos)
 
                 # Compara ID o nombre
-                if str(alumno.id.strip()) == opcion or alumno.nombre.strip().lower() == opcion.lower():
+                if (str(alumno.id.strip()) == opcion or alumno.nombre.strip().lower() == opcion.lower()) and alumno.estado == True:
                     usuario_encontrado = True
 
                     # Confirmación de desactivación
@@ -372,7 +372,7 @@ def desactivarUsua():
             pass  # Final del archivo
 
         if opcion != "" and not usuario_encontrado:
-            print("Usuario no encontrado.")
+            print("El usuario se encuentra desactivado o no existe.")
             input("Presione Enter para continuar...")
 def gestReportes():
     opc = ""
@@ -634,7 +634,6 @@ def reportarCandidato():
                         reporte.estado = 0
                         pickle.dump(reporte, arLoReportes)
                         arLoReportes.flush()
-                        mostrarReportes()
                         input()
 
             else:
@@ -642,6 +641,19 @@ def reportarCandidato():
                 menuReportar()
                 print("\nIngrese el ID/Nombre del usuario que desea reportar o Enter para salir: ")
                 idReportado = input("\nEl usuario que desea reportar no se encuentra activo o no existe. Por favor, intente de nuevo: ")
+def mostrarCandidatos():
+    cantidadAlumnos=1
+    arLoAlumnos.seek(0,0)
+    while arLoAlumnos.tell() < os.path.getsize(arFiAlumnos):
+        alumno=pickle.load(arLoAlumnos)
+        cantidadAlumnos+=1
+    arLoAlumnos.seek(0,0)
+    for i in range (1,cantidadAlumnos):
+        alumno=pickle.load(arLoAlumnos) 
+        if alumno.estado and i != id:
+            print(f"||Id:{i}||Nombre:{alumno.nombre.strip()}||Fecha de nacimiento:{alumno.fnac.strip()}||Edad:{calcularEdad(alumno.fnac.strip())}||Biografia:{alumno.bio.strip()}||Hobbies:{alumno.hob.strip()}||")
+
+
 def verCandidatos():
     cls()
     cantidadAlumnos = 0
@@ -659,7 +671,7 @@ def verCandidatos():
         cantidadAlumnos += 1
 
     # Verificar que el nombre ingresado sea correcto
-    while meGusta != "":
+    while meGusta != "":  # Mientras el usuario no presione Enter para salir
         encontrado = False
         id_estudiante = None  # Inicializamos variable de control
         
@@ -694,26 +706,77 @@ def verCandidatos():
                     # Guardar el like
                     like.remitente = id
                     like.destinatario = id_estudiante
+                    arLoLikes.seek(0, 2)
+                    input(os.path.getsize(arFiLikes))
                     pickle.dump(like, arLoLikes)
                     arLoLikes.flush()
+                    input(os.path.getsize(arFiLikes))
 
         else:
             print("No se encontró el estudiante con ese nombre o ID, o el estudiante no está activo.")
 
         # Pedir nueva entrada para otro estudiante o salir
         meGusta = input("\nIngrese el nombre o id del estudiante que le gustaría hacer un Matcheo, o presione Enter para salir: ")
-def mostrarCandidatos():
-    cantidadAlumnos=1
-    arLoAlumnos.seek(0,0)
-    while arLoAlumnos.tell() < os.path.getsize(arFiAlumnos):
-        alumno=pickle.load(arLoAlumnos)
-        cantidadAlumnos+=1
-    arLoAlumnos.seek(0,0)
-    for i in range (1,cantidadAlumnos):
-        alumno=pickle.load(arLoAlumnos) 
-        if alumno.estado and i != id:
-            print(f"||Id:{i}||Nombre:{alumno.nombre.strip()}||Fecha de nacimiento:{alumno.fnac.strip()}||Edad:{calcularEdad(alumno.fnac.strip())}||Biografia:{alumno.bio.strip()}||Hobbies:{alumno.hob.strip()}||")
-#
+
+def verificarMatch(remitente, destinatario):
+    encontrado = False
+    arLoLikes.seek(0, 0)
+    
+    while arLoLikes.tell() < os.path.getsize(arFiLikes) and not encontrado:
+        like = pickle.load(arLoLikes)
+        
+        # Si el destinatario coincide con el remitente en el like
+        if like.remitente == destinatario and like.destinatario == remitente:
+            encontrado = True  # Se encontró un match
+        
+    return encontrado
+
+def reportesEstadisticos():
+    cls()
+    print("***** REPORTES ESTADISTICOS *****\n")
+
+    likesRecibidosNoDevueltos = 0
+    likesDadosNoDevueltos = 0
+    matcheos = 0
+    totalCandidatos = 0
+
+    arLoLikes.seek(0, 0)
+    while arLoLikes.tell() < os.path.getsize(arFiLikes):
+        like = pickle.load(arLoLikes)
+        print(os.path.getsize(arFiLikes))
+        print(arLoLikes.tell())
+        input("x")
+        
+        # Si el remitente es el usuario actual (id), es un like que diste
+        if like.remitente == id:
+            totalCandidatos += 1
+            input("primer if")
+            if not verificarMatch(like.remitente, like.destinatario):
+                likesDadosNoDevueltos += 1  # Aumentar el contador de likes dados y no recibidos
+                input("segundo if")
+            else:
+                matcheos += 1  # Si hay match, aumentar el contador de matcheos
+                input("primer else")
+        
+        # Si el destinatario es el usuario actual (id), es un like que recibiste
+        elif like.destinatario == id:
+            input("primer elif")
+            if not verificarMatch(like.remitente, like.destinatario):
+                input("elif if")
+                likesRecibidosNoDevueltos += 1  # Aumentar el contador de likes recibidos y no respondidos
+
+    # Calcular el porcentaje de matcheos
+    if totalCandidatos > 0:
+        probabilidad = (matcheos / totalCandidatos) * 100
+    else:
+        probabilidad = 0  # Si no hay candidatos, la probabilidad es 0
+
+    # Mostrar los resultados
+    print("Porcentaje de matcheos sobre el total posible: {:.1f}%".format(probabilidad))
+    print("Likes dados y no recibidos: " + str(likesDadosNoDevueltos))
+    print("Likes recibidos y no respondidos: " + str(likesRecibidosNoDevueltos))
+
+    input("\nPresione Enter para volver...")
 
 #funciones Moderadores
 def mostrarEstudiantes():
@@ -831,14 +894,14 @@ def reportes():
 def mostrarModeradores():
     cantidadModeradores=1
     arLoModeradores.seek(0,0)
-    while arLoModeradores.tell() < os.path.getsize(arFiModeradores):
+    while arLoModeradores.tell() < os.path.getsize(arFiModeradore):
         moderador=pickle.load(arLoModeradores)
         cantidadModeradores+=1
     arLoModeradores.seek(0,0)
     for i in range (1,cantidadModeradores):
         moderador=pickle.load(arLoModeradores) 
         if moderador.estado:
-            print(f"||Id:{i}||Nombre:{moderador.nombre.strip()}")
+            print(f"||Id:{i}||Nombre:{moderador.nombre.strip()}||Email:{moderador.email.strip()}")
 
 #funciones admin
 def menuAdmin():
