@@ -174,6 +174,7 @@ def formatearAlumnos(alumnos):
     alumnos.bio = alumnos.bio.ljust(255, ' ')
     alumnos.hob = alumnos.hob.ljust(255, ' ')
 def formatearModeradores(moderador):
+    moderador.id = str(moderador.id).ljust(5, ' ')
     moderador.email = moderador.email.ljust(32, ' ')
     moderador.contraseña = moderador.contraseña.ljust(32, ' ')
     moderador.nombre = moderador.nombre.ljust(32, ' ')
@@ -728,6 +729,7 @@ def mostrarEstudiantes():
         if alumno.estado:
             print(f"||Id:{i}||Nombre:{alumno.nombre.strip()}||Fecha de nacimiento:{alumno.fnac.strip()}||Edad:{calcularEdad(alumno.fnac.strip())}||Biografia:{alumno.bio.strip()}||Hobbies:{alumno.hob.strip()}||")
 def mostrarReportes():
+    alumno=Alumno()
     reporte=Reporte()
     idReporte=1
     mostrarEstudiantes()
@@ -739,9 +741,23 @@ def mostrarReportes():
     arLoReportes.seek(0,0)
     print("\n***** REPORTES *****\n")
     for i in range (1,cantidadReportes):
-        reporte=pickle.load(arLoReportes) 
-        if reporte.estado==0:
+        reporte=pickle.load(arLoReportes)
+        pos=arLoReportes.tell()
+        arLoAlumnos.seek(0,0)
+        for i in range(0,reporte.id_reportante):
+            alumno=pickle.load(arLoAlumnos)
+            e1=alumno.estado
+        arLoAlumnos.seek(0,0)
+        for i in range(0,reporte.id_reportado):
+            alumno=pickle.load(arLoAlumnos)
+            e2=alumno.estado
+        if reporte.estado==0 and e1 and e2:
             print(f"||Id Reporte: {idReporte}||Id reportante: {reporte.id_reportante}||Id reportado: {reporte.id_reportado}||Motivo del reporte: {reporte.razon_reporte.strip()}||Estado del reporte: {reporte.estado}||")
+        else:
+            reporte.estado=-1
+            arLoReportes.seek(pos,0)
+            pickle.dump(reporte,arLoReportes)
+            arLoReportes.flush()
         idReporte+=1
    
 def reportes():
