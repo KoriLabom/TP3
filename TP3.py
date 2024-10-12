@@ -818,6 +818,7 @@ def reportes():
             arLoReportes.seek(0,0)
             for i in range(0,idreporte):
                 reporte = pickle.load(arLoReportes)
+                posr = arLoReportes.tell()
             if opc=="1":
                 reporte.estado=2
                 pickle.dump(reporte, arLoReportes)
@@ -827,19 +828,22 @@ def reportes():
                 arLoAlumnos.seek(0, 0)
                 # Recorre hasta el registro del alumno con id == idreportado
                 for i in range(0, idreportado):
-                    pos = arLoAlumnos.tell()  # Guarda la posición actual
+                    posa = arLoAlumnos.tell()  # Guarda la posición actual
                     alumno = pickle.load(arLoAlumnos)
                 
                 # Cambia el estado del alumno
                 alumno.estado = False
                 
                 # Mueve el puntero a la posición del alumno leído para sobrescribirlo
-                arLoAlumnos.seek(pos)
+                arLoAlumnos.seek(posa)
                 
                 # Sobrescribe el registro del alumno en el archivo
                 pickle.dump(alumno, arLoAlumnos)
                 arLoAlumnos.flush()  # Asegura que los datos se escriban
                 
+                # Mueve el puntero a la posición del reporte leído para sobrescribirlo
+                arLoReportes.seek(posr)
+
                 # Actualiza el reporte
                 reporte.estado = 1
                 pickle.dump(reporte, arLoReportes)
@@ -913,11 +917,11 @@ def registro():
         alumno.email = email
 
     # Solicitar y validar la contraseña
-    contraseña = getpass.getpass("Ingrese contraseña (MAX. 32 Carac): \n")
+    contraseña = input("Ingrese contraseña (MAX. 32 Carac): \n")
     while len(contraseña) > 32:
         cls()
         print("MAXIMO 32 CARACTERES")
-        contraseña = getpass.getpass("Ingrese contraseña (MAX. 32 Carac): \n")
+        contraseña = input("Ingrese contraseña (MAX. 32 Carac): \n")
     while len(contraseña) < 8:
         cls()
         contraseña = input("Su contraseña debe tener mínimo 8 caracteres, intente nuevamente: \n")
