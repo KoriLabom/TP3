@@ -725,12 +725,7 @@ def verificarMatch(remitente, destinatario):
     while arLoLikes.tell() < os.path.getsize(arFiLikes) and not encontrado:
         like = pickle.load(arLoLikes)
         # Si el destinatario coincide con el remitente en el like
-<<<<<<< HEAD
-        if like.remitente == destinatario and like.destinatario == remitente:
-            input("Matcheado")
-=======
         if str(like.remitente).strip() == str(destinatario).strip() and str(like.destinatario).strip() == str(remitente).strip():
->>>>>>> 39bc6dd2e45f2e517362fbd8bd21b72d1cb3f0f2
             encontrado = True  # Se encontró un match
     arLoLikes.seek(pos, 0)
     return encontrado
@@ -742,14 +737,18 @@ def reportesEstadisticos():
     likesRecibidosNoDevueltos = 0
     likesDadosNoDevueltos = 0
     matcheos = 0
-    totalCandidatos = 0
+    totalCandidatos = -1
 
+    while arLoAlumnos.tell() < os.path.getsize(arFiAlumnos):
+        alumno = pickle.load(arLoAlumnos)
+        if alumno.estado:
+            totalCandidatos += 1
     arLoLikes.seek(0, 0)
     while arLoLikes.tell() < os.path.getsize(arFiLikes):
         like = pickle.load(arLoLikes)
         
         # Si el remitente es el usuario actual (id), es un like que diste
-        if like.remitente == id:
+        if str(like.remitente).strip() == str(id).strip():
             totalCandidatos += 1
             if not verificarMatch(like.remitente, like.destinatario):
                 likesDadosNoDevueltos += 1  # Aumentar el contador de likes dados y no recibidos
@@ -757,13 +756,13 @@ def reportesEstadisticos():
                 matcheos += 1  # Si hay match, aumentar el contador de matcheos
         
         # Si el destinatario es el usuario actual (id), es un like que recibiste
-        elif like.destinatario == id:
+        elif str(like.destinatario).strip() == str(id).strip():
             if not verificarMatch(like.remitente, like.destinatario):
                 likesRecibidosNoDevueltos += 1  # Aumentar el contador de likes recibidos y no respondidos
     
     # Calcular el porcentaje de matcheos
     if totalCandidatos > 0:
-        probabilidad = (matcheos // totalCandidatos) * 100
+        probabilidad = (matcheos / totalCandidatos) * 100
     else:
         probabilidad = 0  # Si no hay candidatos, la probabilidad es 0
 
@@ -1176,10 +1175,10 @@ def registro():
         cantReg = tamArc // tamReg
 
         id_alum = str(cantReg + 2)
-        if len(id_alum) < 5:
-            alumno.id = str(id_alum.ljust(5, ' '))
-        else:
-            alumno.id = id_alum
+        # if len(id_alum) < 5:
+        #     alumno.id = str(id_alum.ljust(5, ' '))
+        # else:
+        alumno.id = id_alum
         
         arLoAlumnos.seek(0, 2)  # Mover el puntero al final del archivo para agregar un nuevo registro
 
@@ -1215,10 +1214,8 @@ def registro():
             print("El email ya está registrado como alumno, moderador o administrador. Ingrese uno nuevo.")
 
     # Guardar el email en el registro
-    if len(email) < 32:
-        alumno.email = email.ljust(32, ' ')
-    elif len(email) == 32:
-        alumno.email = email
+    
+    alumno.email = email
 
     # Solicitar y validar la contraseña
     contraseña = input("Ingrese contraseña (MAX. 32 Carac): \n")
@@ -1229,10 +1226,8 @@ def registro():
     while len(contraseña) < 8:
         cls()
         contraseña = input("Su contraseña debe tener mínimo 8 caracteres, intente nuevamente: \n")
-    if len(contraseña) < 32:
-        alumno.contraseña = contraseña.ljust(32, ' ')
-    elif len(contraseña) == 32:
-        alumno.contraseña = contraseña
+   
+    alumno.contraseña = contraseña
 
     # Recolectar otros datos
     nombre = str(input("Ingrese su nombre para finalizar el registro (MAX. 32 Carac): \n"))
@@ -1243,10 +1238,8 @@ def registro():
         cls()
         print("MAXIMO 32 CARACTERES")
         nombre = str(input("Ingrese nombre (MAX. 32 Carac): \n"))
-    if len(nombre) < 32:
-        alumno.nombre = nombre.ljust(32, ' ')
-    elif len(nombre) == 32:
-        alumno.nombre = nombre
+   
+    alumno.nombre = nombre
 
     # Fecha de nacimiento
     fNacimiento = str(input("Ingrese su fecha de nacimiento (DD-MM-AAAA): "))
@@ -1266,10 +1259,8 @@ def registro():
         cls()
         print("MAXIMO 255 CARACTERES")
         bio = str(input("Ingrese biografía (MAX. 255 Carac): \n"))
-    if len(bio) < 255:
-        alumno.bio = bio.ljust(255, ' ')
-    else:
-        alumno.bio = bio
+   
+    alumno.bio = bio
     
     # Hobbies
     hob = str(input("Ingrese hobbies (MAX. 255 Carac): \n"))
@@ -1277,12 +1268,11 @@ def registro():
         cls()
         print("MAXIMO 255 CARACTERES")
         hob = str(input("Ingrese hobbies (MAX. 255 Carac): \n"))
-    if len(hob) < 255:
-        alumno.hob = hob.ljust(255, ' ')
-    else:
+   
         alumno.hob = hob
 
     # Guardar el nuevo registro en el archivo
+    formatearAlumnos(alumno)
     pickle.dump(alumno, arLoAlumnos)
     arLoAlumnos.flush()
     input("Registro exitoso, presione Enter para continuar...")
