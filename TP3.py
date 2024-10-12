@@ -728,6 +728,7 @@ def verificarMatch(remitente, destinatario):
         
         # Si el destinatario coincide con el remitente en el like
         if like.remitente == destinatario and like.destinatario == remitente:
+            input("Matcheado")
             encontrado = True  # Se encontró un match
     arLoLikes.seek(pos, 0)
     return encontrado
