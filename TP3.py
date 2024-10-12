@@ -722,13 +722,15 @@ def verificarMatch(remitente, destinatario):
     encontrado = False
     pos = arLoLikes.tell()
     arLoLikes.seek(0, 0)
-    
     while arLoLikes.tell() < os.path.getsize(arFiLikes) and not encontrado:
         like = pickle.load(arLoLikes)
-        
         # Si el destinatario coincide con el remitente en el like
+<<<<<<< HEAD
         if like.remitente == destinatario and like.destinatario == remitente:
             input("Matcheado")
+=======
+        if str(like.remitente).strip() == str(destinatario).strip() and str(like.destinatario).strip() == str(remitente).strip():
+>>>>>>> 39bc6dd2e45f2e517362fbd8bd21b72d1cb3f0f2
             encontrado = True  # Se encontró un match
     arLoLikes.seek(pos, 0)
     return encontrado
