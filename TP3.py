@@ -174,7 +174,6 @@ def formatearAlumnos(alumnos):
     alumnos.bio = alumnos.bio.ljust(255, ' ')
     alumnos.hob = alumnos.hob.ljust(255, ' ')
 def formatearModeradores(moderador):
-    moderador.id = str(moderador.id).ljust(5, ' ')
     moderador.email = moderador.email.ljust(32, ' ')
     moderador.contraseña = moderador.contraseña.ljust(32, ' ')
     moderador.nombre = moderador.nombre.ljust(32, ' ')
@@ -325,7 +324,7 @@ def desactivarUsua():
     while opcion != "":
         cls()
         print("***** DESACTIVAR USUARIO *****\n")
-        print("Lista de usuarios:")
+        print("Lista de estudiantes:")
         mostrarEstudiantes()
         try:
             while arLoAlumnos.tell() < os.path.getsize(arFiAlumnos):
@@ -976,6 +975,109 @@ def darAltaMod():
     pickle.dump(alumno, arLoModeradores)
     arLoModeradores.flush()
     input("Moderador dado de alta, presione Enter para continuar...")
+def eliminarUsuario():
+    global opcE, opcsubp
+    cls()
+    opcion = " "
+    
+    while opcion != "":
+        cls()
+        print("***** ELIMINAR USUARIO *****\n")
+        
+        # Preguntar si desea eliminar un estudiante o un moderador
+        tipo_usuario = input("¿Desea eliminar un estudiante o un moderador? (E/M): ").strip().upper()
+        
+        while tipo_usuario not in ["E", "M"]:
+            tipo_usuario = input("Ingreso inválido. Ingrese 'E' para Estudiante o 'M' para Moderador: ").strip().upper()
+        
+        if tipo_usuario == "E":
+            # Mostrar lista de estudiantes
+            print("Lista de estudiantes:")
+            mostrarEstudiantes()  # Asumimos que esta función ya está definida
+            
+            # Pedir al moderador que ingrese un ID o nombre
+            opcion = input("\nIngrese el ID o Nombre del estudiante para desactivar, o presione Enter para volver: ")
+            
+            # Buscar entre los alumnos
+            usuario_encontrado = False
+            arLoAlumnos.seek(0, 0)  # Volver al inicio del archivo de alumnos
+            try:
+                while arLoAlumnos.tell() < os.path.getsize(arFiAlumnos) and not usuario_encontrado:
+                    pos = arLoAlumnos.tell()  # Guardar la posición actual
+                    alumno = pickle.load(arLoAlumnos)
+
+                    # Compara ID o nombre
+                    if str(alumno.id.strip()) == opcion or alumno.nombre.strip().lower() == opcion.lower():
+                        usuario_encontrado = True
+                        # Confirmación de desactivación
+                        print(f"\n¿Está seguro que desea desactivar el perfil de {alumno.nombre.strip()}?")
+                        print(" 1. Desactivar")
+                        print(" 0. Cancelar")
+                        opc = input("\nIngrese una opción: ")
+                        while opc not in ["0", "1"]:
+                            opc = input("Ingreso inválido, ingrese otra opción: ")
+                        
+                        if opc == "1":
+                            # Desactivar el alumno
+                            arLoAlumnos.seek(pos, 0)  # Volver a la posición del usuario
+                            alumno.estado = False  # Desactivar el alumno
+                            formatearAlumnos(alumno)
+                            pickle.dump(alumno, arLoAlumnos)
+                            arLoAlumnos.flush()  # Asegurar que se guarda el cambio
+                            print(f"\nEl usuario {alumno.nombre.strip()} ha sido desactivado correctamente!")
+                            input("Presione Enter para continuar...")
+                        else:
+                            print("Operación cancelada.")
+            
+            except EOFError:
+                pass  # Final del archivo de alumnos
+
+        elif tipo_usuario == "M":
+            # Mostrar lista de moderadores
+            print("Lista de moderadores:")
+            mostrarModeradores()  # Asumimos que esta función ya está definida
+            
+            # Pedir al moderador que ingrese un ID o nombre
+            opcion = input("\nIngrese el ID o Nombre del moderador para desactivar, o presione Enter para volver: ")
+            
+            # Buscar entre los moderadores
+            usuario_encontrado = False
+            arLoModeradores.seek(0, 0)  # Volver al inicio del archivo de moderadores
+            try:
+                while arLoModeradores.tell() < os.path.getsize(arFiModeradores) and not usuario_encontrado:
+                    pos = arLoModeradores.tell()  # Guardar la posición actual
+                    moderador = pickle.load(arLoModeradores)
+
+                    # Compara ID o nombre
+                    if str(moderador.id).strip() == opcion or moderador.nombre.strip().lower() == opcion.lower():
+                        usuario_encontrado = True
+                        # Confirmación de desactivación
+                        print(f"\n¿Está seguro que desea desactivar el perfil de {moderador.nombre.strip()}?")
+                        print(" 1. Desactivar")
+                        print(" 0. Cancelar")
+                        opc = input("\nIngrese una opción: ")
+                        while opc not in ["0", "1"]:
+                            opc = input("Ingreso inválido, ingrese otra opción: ")
+                        
+                        if opc == "1":
+                            # Desactivar el moderador
+                            arLoModeradores.seek(pos, 0)  # Volver a la posición del usuario
+                            moderador.estado = False  # Desactivar el moderador
+                            pickle.dump(moderador, arLoModeradores)
+                            arLoModeradores.flush()  # Asegurar que se guarda el cambio
+                            print(f"\nEl moderador {moderador.nombre.strip()} ha sido desactivado correctamente!")
+                            input("Presione Enter para continuar...")
+                        else:
+                            print("Operación cancelada.")
+            
+            except EOFError:
+                pass  # Final del archivo de moderadores
+        
+        # Si no se encontró el usuario
+        if opcion != "" and not usuario_encontrado:
+            print("Usuario no encontrado.")
+            input("Presione Enter para continuar...")
+
 #Registro y login
 def registro():
     cls()
