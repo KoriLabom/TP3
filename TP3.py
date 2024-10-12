@@ -414,29 +414,6 @@ def inicio():
 def finPrograma():
     cls()
     print("GRACIAS POR USAR NUESTRO PROGRAMA")
-def menuAdmin():
-    cls()
-    print(" ***** MENÚ ADMIN *****\n")
-    print("   1. Gestionar Usuarios")
-    print("   2. Gestionar Reportes")
-    print("   3. Reportes Estadísticos")
-    print("   0. Salir")
-def opcmenuAdmin():
-    global maxint
-    opc = ""
-    while(opc!= "0"):
-        menuAdmin()
-        opc = input("\nIngrese una opción:  ")
-        while (opc<"0" or opc>"6"):
-            opc = input("ingreso inválido, ingrese otra opción: ")
-        match opc:
-            case "1": gestUsuariosAdm()
-            case "2": gestReportes()
-            case "3": repEstadisticos()
-            case "4": Bonustrack1()
-            case "5": Bonustrack2()
-            case "6": Bonustrack3()
-            case "0": maxint = 0
 #FIN MENUS
 
 #Funciones estudiantes
@@ -651,14 +628,15 @@ def reportarCandidato():
                     while opc != 's' and opc != 'n':
                         opc = input("Respuesta inválida. ¿Desea guardar y enviar el reporte? (s/n): ")
                     if opc == "s":
-                        tamReg = os.path.getsize(arFiLikes)
-                        arLoReportes.seek(tamReg,0)
+                        arLoReportes.seek(0, 2)
                         reporte.id_reportado = idReportado
                         reporte.id_reportante = id
                         reporte.razon_reporte = motivo
                         reporte.estado = 0
                         pickle.dump(reporte, arLoReportes)
                         arLoReportes.flush()
+                        mostrarReportes()
+                        input()
 
             else:
                 cls()
@@ -751,6 +729,7 @@ def mostrarEstudiantes():
         if alumno.estado:
             print(f"||Id:{i}||Nombre:{alumno.nombre.strip()}||Fecha de nacimiento:{alumno.fnac.strip()}||Edad:{calcularEdad(alumno.fnac.strip())}||Biografia:{alumno.bio.strip()}||Hobbies:{alumno.hob.strip()}||")
 def mostrarReportes():
+    reporte=Reporte()
     idReporte=1
     mostrarEstudiantes()
     cantidadReportes=1
@@ -764,7 +743,8 @@ def mostrarReportes():
         reporte=pickle.load(arLoReportes) 
         if reporte.estado==0:
             print(f"||Id Reporte: {idReporte}||Id reportante: {reporte.id_reportante}||Id reportado: {reporte.id_reportado}||Motivo del reporte: {reporte.razon_reporte.strip()}||Estado del reporte: {reporte.estado}||")
-            idReporte+=1
+        idReporte+=1
+   
 def reportes():
     cantRep=0
     reporte=Reporte()
@@ -812,30 +792,40 @@ def reportes():
             opc=input("Como desea proceder con el reporte seleccionado?")
             while opc<"0" or opc>"2":
                 opc = input("Ingreso invalido, ingrese otra opción: ")
-            arLoReportes.seek(0)
-            input(idreporte)
+            arLoReportes.seek(0,0)
             for i in range(0,idreporte):
                 reporte = pickle.load(arLoReportes)
-                input("x")
+                posr = arLoReportes.tell()
             if opc=="1":
-                input("a")
                 reporte.estado=2
-                input("a")
                 pickle.dump(reporte, arLoReportes)
-                input("a")
                 arLoReportes.flush()
-                input("a")
             if opc=="2":
-                idreportado=reporte.id_reportado
-                arLoAlumnos.seek(0,0)
-                for i in range(0,idreportado):
-                    alumno=pickle.load(arLoAlumnos)
-                alumno.estado=False
-                reporte.estado=1
+                idreportado = reporte.id_reportado
+                arLoAlumnos.seek(0, 0)
+                # Recorre hasta el registro del alumno con id == idreportado
+                for i in range(0, idreportado):
+                    posa = arLoAlumnos.tell()  # Guarda la posición actual
+                    alumno = pickle.load(arLoAlumnos)
+                
+                # Cambia el estado del alumno
+                alumno.estado = False
+                
+                # Mueve el puntero a la posición del alumno leído para sobrescribirlo
+                arLoAlumnos.seek(posa)
+                
+                # Sobrescribe el registro del alumno en el archivo
                 pickle.dump(alumno, arLoAlumnos)
-                arLoAlumnos.flush()
+                arLoAlumnos.flush()  # Asegura que los datos se escriban
+                
+                # Mueve el puntero a la posición del reporte leído para sobrescribirlo
+                arLoReportes.seek(posr)
+
+                # Actualiza el reporte
+                reporte.estado = 1
                 pickle.dump(reporte, arLoReportes)
-                arLoReportes.flush()
+                arLoReportes.flush()  # Asegura que los datos se escriban
+
             if opc=="0":
                 print("Regresando al menu anterior")
                 input()    
@@ -852,6 +842,29 @@ def mostrarModeradores():
             print(f"||Id:{i}||Nombre:{moderador.nombre.strip()}")
 
 #funciones admin
+def menuAdmin():
+    cls()
+    print(" ***** MENÚ ADMIN *****\n")
+    print("   1. Gestionar Usuarios")
+    print("   2. Gestionar Reportes")
+    print("   3. Reportes Estadísticos")
+    print("   0. Salir")
+def opcmenuAdmin():
+    global maxint
+    opc = ""
+    while(opc!= "0"):
+        menuAdmin()
+        opc = input("\nIngrese una opción:  ")
+        while (opc<"0" or opc>"6"):
+            opc = input("ingreso inválido, ingrese otra opción: ")
+        match opc:
+            case "1": gestUsuariosAdm()
+            case "2": gestReportes()
+            case "3": repEstadisticos()
+            case "4": Bonustrack1()
+            case "5": Bonustrack2()
+            case "6": Bonustrack3()
+            case "0": maxint = 0
 def menuGestUsuariosAdm():
     cls()
     print("***** GESTIONAR USUARIOS *****\n")
@@ -870,7 +883,99 @@ def gestUsuariosAdm():
             case "1": eliminarUsuario()
             case "2": darAltaMod()
             case "3": desactivarUsua()
+def darAltaMod():
+    cls()
+    moderador = Moderador()
 
+    if os.path.getsize(arFiModeradores) == 0:
+        alumno.id = 1
+    else:
+        arLoModeradores.seek(0, 0)
+
+        # Calcular tamaño del registro
+        alumno = pickle.load(arLoModeradores)
+        tamReg = arLoModeradores.tell()
+        tamArc = os.path.getsize(arFiAlumnos)
+
+        # Cantidad de registros
+        cantReg = tamArc // tamReg
+
+        id_alum = str(cantReg + 2)
+        if len(id_alum) < 5:
+            alumno.id = str(id_alum.ljust(5, ' '))
+        else:
+            alumno.id = id_alum
+        
+        arLoModeradores.seek(0, 2)  # Mover el puntero al final del archivo para agregar un nuevo registro
+
+    # Verificar si el email ya está registrado en Alumnos, Moderadores, o Administradores
+    email_valido = False
+    while not email_valido:
+        email = str(input("Ingrese correo electrónico (MAX. 32 Carac): \n"))
+        
+        while len(email) > 32:
+            cls()
+            print("MAXIMO 32 CARACTERES!")
+            email = str(input("Ingrese correo electrónico (MAX. 32 Carac): \n"))
+        while len(email) < 12:
+            cls()
+            email = input("Su email debe tener mínimo 12 caracteres, intente nuevamente:\n")
+
+        # Comprobar el email en el archivo de Alumnos
+        encontrado = buscarMailRep(email, arLoAlumnos)
+
+        # Si no se encuentra en Alumnos, buscar en Moderadores
+        if encontrado == 1:
+            encontrado = buscarMailRep(email, arLoModeradores)
+
+        # Si no se encuentra en Moderadores, buscar en Administradores
+        if encontrado == 1:
+            encontrado = buscarMailRep(email, arLoAdmin)
+
+        # Si el email no se encuentra en ninguno de los archivos, es válido
+        if encontrado == 1:
+            email_valido = True
+        else:
+            cls()
+            print("El email ya está registrado como alumno, moderador o administrador. Ingrese uno nuevo.")
+
+    # Guardar el email en el registro
+    if len(email) < 32:
+        alumno.email = email.ljust(32, ' ')
+    elif len(email) == 32:
+        alumno.email = email
+
+    # Solicitar y validar la contraseña
+    contraseña = input("Ingrese contraseña (MAX. 32 Carac): \n")
+    while len(contraseña) > 32:
+        cls()
+        print("MAXIMO 32 CARACTERES")
+        contraseña = input("Ingrese contraseña (MAX. 32 Carac): \n")
+    while len(contraseña) < 8:
+        cls()
+        contraseña = input("Su contraseña debe tener mínimo 8 caracteres, intente nuevamente: \n")
+    if len(contraseña) < 32:
+        alumno.contraseña = contraseña.ljust(32, ' ')
+    elif len(contraseña) == 32:
+        alumno.contraseña = contraseña
+
+    # Recolectar otros datos
+    nombre = str(input("Ingrese su nombre para finalizar el registro (MAX. 32 Carac): \n"))
+    while len(nombre) < 3:
+        cls()
+        nombre = input("Su nombre debe tener mínimo 3 caracteres, intente nuevamente:\n")
+    while len(nombre) > 32:
+        cls()
+        print("MAXIMO 32 CARACTERES")
+        nombre = str(input("Ingrese nombre (MAX. 32 Carac): \n"))
+    if len(nombre) < 32:
+        alumno.nombre = nombre.ljust(32, ' ')
+    elif len(nombre) == 32:
+        alumno.nombre = nombre
+    # Guardar el nuevo registro en el archivo
+    pickle.dump(alumno, arLoModeradores)
+    arLoModeradores.flush()
+    input("Moderador dado de alta, presione Enter para continuar...")
 #Registro y login
 def registro():
     cls()
@@ -935,11 +1040,11 @@ def registro():
         alumno.email = email
 
     # Solicitar y validar la contraseña
-    contraseña = getpass.getpass("Ingrese contraseña (MAX. 32 Carac): \n")
+    contraseña = input("Ingrese contraseña (MAX. 32 Carac): \n")
     while len(contraseña) > 32:
         cls()
         print("MAXIMO 32 CARACTERES")
-        contraseña = getpass.getpass("Ingrese contraseña (MAX. 32 Carac): \n")
+        contraseña = input("Ingrese contraseña (MAX. 32 Carac): \n")
     while len(contraseña) < 8:
         cls()
         contraseña = input("Su contraseña debe tener mínimo 8 caracteres, intente nuevamente: \n")
