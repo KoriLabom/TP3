@@ -430,7 +430,7 @@ def opcmenuAdmin():
         while (opc<"0" or opc>"6"):
             opc = input("ingreso inválido, ingrese otra opción: ")
         match opc:
-            case "1": gestUsuarios()
+            case "1": gestUsuariosAdm()
             case "2": gestReportes()
             case "3": repEstadisticos()
             case "4": Bonustrack1()
@@ -765,7 +765,6 @@ def mostrarReportes():
         if reporte.estado==0:
             print(f"||Id Reporte: {idReporte}||Id reportante: {reporte.id_reportante}||Id reportado: {reporte.id_reportado}||Motivo del reporte: {reporte.razon_reporte.strip()}||Estado del reporte: {reporte.estado}||")
             idReporte+=1
-   
 def reportes():
     cantRep=0
     reporte=Reporte()
@@ -840,8 +839,39 @@ def reportes():
             if opc=="0":
                 print("Regresando al menu anterior")
                 input()    
+def mostrarModeradores():
+    cantidadModeradores=1
+    arLoModeradores.seek(0,0)
+    while arLoModeradores.tell() < os.path.getsize(arFiModeradores):
+        moderador=pickle.load(arLoModeradores)
+        cantidadModeradores+=1
+    arLoModeradores.seek(0,0)
+    for i in range (1,cantidadModeradores):
+        moderador=pickle.load(arLoModeradores) 
+        if moderador.estado:
+            print(f"||Id:{i}||Nombre:{moderador.nombre.strip()}")
 
+#funciones admin
+def menuGestUsuariosAdm():
+    cls()
+    print("***** GESTIONAR USUARIOS *****\n")
+    print("   1. Eliminar usuario")
+    print("   2. Dar de alta un moderador")
+    print("   3. Desactivar usuario")
+    print("   0. Volver")
+def gestUsuariosAdm():
+    opc = ""
+    while(opc!= "0"):
+        menuGestUsuariosAdm()
+        opc = input("\nIngrese opción:  ")
+        while(opc<"0" or opc>"4"):
+            opc = input("Ingreso invalido, ingrese otra opción: ")
+        match opc:
+            case "1": eliminarUsuario()
+            case "2": darAltaMod()
+            case "3": desactivarUsua()
 
+#Registro y login
 def registro():
     cls()
     alumno = Alumno()
