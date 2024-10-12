@@ -901,96 +901,101 @@ def gestUsuariosAdm():
 def darAltaMod():
     cls()
     moderador = Moderador()
+    arLoModeradores.seek(0, 0)
 
-    if os.path.getsize(arFiModeradores) == 0:
-        alumno.id = 1
+    # Calcular tamaño del registro
+    moderador = pickle.load(arLoModeradores)
+    tamReg = arLoModeradores.tell()
+    tamArc = os.path.getsize(arFiModeradores)
+    # Cantidad de registros
+    cantReg = tamArc // tamReg
+    id_mod = str(cantReg + 2)
+    if len(id_mod) < 5:
+        moderador.id = str(id_mod.ljust(5, ' '))
     else:
-        arLoModeradores.seek(0, 0)
-
-        # Calcular tamaño del registro
-        alumno = pickle.load(arLoModeradores)
-        tamReg = arLoModeradores.tell()
-        tamArc = os.path.getsize(arFiAlumnos)
-
-        # Cantidad de registros
-        cantReg = tamArc // tamReg
-
-        id_alum = str(cantReg + 2)
-        if len(id_alum) < 5:
-            alumno.id = str(id_alum.ljust(5, ' '))
-        else:
-            alumno.id = id_alum
+        moderador.id = id_mod
         
-        arLoModeradores.seek(0, 2)  # Mover el puntero al final del archivo para agregar un nuevo registro
+    arLoModeradores.seek(0, 2)  # Mover el puntero al final del archivo para agregar un nuevo registro
 
-    # Verificar si el email ya está registrado en Alumnos, Moderadores, o Administradores
+    salir = False
+
+    # Ingreso de email
     email_valido = False
-    while not email_valido:
-        email = str(input("Ingrese correo electrónico (MAX. 32 Carac): \n"))
-        
-        while len(email) > 32:
+    while not email_valido and not salir:
+        cls()
+        print("***** DAR ALTA MODERADOR *****")
+        email = str(input("Ingrese correo electrónico (MAX. 32 Carac) o presione Enter para salir: \n"))
+
+        if email == "":
+            salir = True
+        elif len(email) > 32:
             cls()
             print("MAXIMO 32 CARACTERES!")
-            email = str(input("Ingrese correo electrónico (MAX. 32 Carac): \n"))
-        while len(email) < 12:
+        elif len(email) < 12:
             cls()
-            email = input("Su email debe tener mínimo 12 caracteres, intente nuevamente:\n")
-
-        # Comprobar el email en el archivo de Alumnos
-        encontrado = buscarMailRep(email, arLoAlumnos)
-
-        # Si no se encuentra en Alumnos, buscar en Moderadores
-        if encontrado == 1:
-            encontrado = buscarMailRep(email, arLoModeradores)
-
-        # Si no se encuentra en Moderadores, buscar en Administradores
-        if encontrado == 1:
-            encontrado = buscarMailRep(email, arLoAdmin)
-
-        # Si el email no se encuentra en ninguno de los archivos, es válido
-        if encontrado == 1:
-            email_valido = True
+            print("El correo debe tener mínimo 12 caracteres.")
         else:
-            cls()
-            print("El email ya está registrado como alumno, moderador o administrador. Ingrese uno nuevo.")
+            # Comprobar el email en los archivos
+            encontrado = buscarMailRep(email, arLoAlumnos)
+            if encontrado == 1:
+                encontrado = buscarMailRep(email, arLoModeradores)
+            if encontrado == 1:
+                encontrado = buscarMailRep(email, arLoAdmin)
 
-    # Guardar el email en el registro
-    if len(email) < 32:
-        alumno.email = email.ljust(32, ' ')
-    elif len(email) == 32:
-        alumno.email = email
+            if encontrado == 1:
+                email_valido = True
+                moderador.email = email.ljust(32, ' ')
+            else:
+                cls()
+                print("El email ya está registrado, intente con otro.")
 
-    # Solicitar y validar la contraseña
-    contraseña = input("Ingrese contraseña (MAX. 32 Carac): \n")
-    while len(contraseña) > 32:
-        cls()
-        print("MAXIMO 32 CARACTERES")
-        contraseña = input("Ingrese contraseña (MAX. 32 Carac): \n")
-    while len(contraseña) < 8:
-        cls()
-        contraseña = input("Su contraseña debe tener mínimo 8 caracteres, intente nuevamente: \n")
-    if len(contraseña) < 32:
-        alumno.contraseña = contraseña.ljust(32, ' ')
-    elif len(contraseña) == 32:
-        alumno.contraseña = contraseña
+    # No continuar si salir está activado
+    if not salir:
+        # Solicitar y validar la contraseña
+        contraseña_valida = False
+        while not contraseña_valida and not salir:
+            contraseña = input("Ingrese contraseña (MAX. 32 Carac) o presione Enter para salir: \n")
 
-    # Recolectar otros datos
-    nombre = str(input("Ingrese su nombre para finalizar el registro (MAX. 32 Carac): \n"))
-    while len(nombre) < 3:
-        cls()
-        nombre = input("Su nombre debe tener mínimo 3 caracteres, intente nuevamente:\n")
-    while len(nombre) > 32:
-        cls()
-        print("MAXIMO 32 CARACTERES")
-        nombre = str(input("Ingrese nombre (MAX. 32 Carac): \n"))
-    if len(nombre) < 32:
-        alumno.nombre = nombre.ljust(32, ' ')
-    elif len(nombre) == 32:
-        alumno.nombre = nombre
-    # Guardar el nuevo registro en el archivo
-    pickle.dump(alumno, arLoModeradores)
-    arLoModeradores.flush()
-    input("Moderador dado de alta, presione Enter para continuar...")
+            if contraseña == "":
+                salir = True
+            elif len(contraseña) > 32:
+                cls()
+                print("MAXIMO 32 CARACTERES")
+            elif len(contraseña) < 8:
+                cls()
+                print("La contraseña debe tener mínimo 8 caracteres.")
+            else:
+                contraseña_valida = True
+                moderador.contraseña = contraseña.ljust(32, ' ')
+
+    # No continuar si salir está activado
+    if not salir:
+        # Recolectar otros datos
+        nombre_valido = False
+        while not nombre_valido and not salir:
+            nombre = input("Ingrese su nombre (MAX. 32 Carac) o presione Enter para salir: \n")
+
+            if nombre == "":
+                salir = True
+            elif len(nombre) > 32:
+                cls()
+                print("MAXIMO 32 CARACTERES")
+            elif len(nombre) < 3:
+                cls()
+                print("El nombre debe tener mínimo 3 caracteres.")
+            else:
+                nombre_valido = True
+                moderador.nombre = nombre.ljust(32, ' ')
+
+    # Guardar el nuevo registro en el archivo si no se activó la salida
+    if not salir:
+        pickle.dump(moderador, arLoModeradores)
+        arLoModeradores.flush()
+        print("Moderador dado de alta exitosamente.")
+    else:
+        print("Registro cancelado.")
+
+    input("Presione Enter para continuar...")
 def eliminarUsuario():
     global opcE, opcsubp
     cls()
