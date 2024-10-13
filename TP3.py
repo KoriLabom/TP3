@@ -1122,6 +1122,10 @@ def darAltaMod():
 
     # Guardar el nuevo registro en el archivo si no se activó la salida
     if not salir:
+        moderador.reportes_ignorados = 0
+        moderador.reportes_aceptados = 0
+        moderador.reportes_ignorados = str(moderador.reportes_ignorados).ljust(5, ' ')
+        moderador.reportes_aceptados = str(moderador.reportes_aceptados).ljust(5, ' ')
         pickle.dump(moderador, arLoModeradores)
         arLoModeradores.flush()
         print("Moderador dado de alta exitosamente.")
