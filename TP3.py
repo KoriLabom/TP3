@@ -296,7 +296,7 @@ def gestCandidatos(): #GESTIONAR CANDIDATOS
         arLoAlumnos.seek(0,0)
         for i in range(0,id):
             alumno=pickle.load(arLoAlumnos)
-        if alumno.credito_revelar>=1:
+        if int(alumno.credito_revelar)>=1:
             subMenuGestionarCandidatosCredito()        
             opc = input("\nIngrese una opción: ")
             while (opc<"0" or opc >"3"):
