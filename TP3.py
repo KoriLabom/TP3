@@ -12,6 +12,7 @@ class Alumno:
         self.hob = " "
         self.sexo = "N" 
         self.puntaje=0
+        self.superlike = 1
 
 class Moderador:
     def __init__ (self):
@@ -65,6 +66,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         alumno.hob = "leer, fútbol"
         alumno.sexo = "H"
         alumno.puntaje = 0
+        alumno.superlike = 1
         formatearAlumnos(alumno)
         pickle.dump(alumno, arLoAlumnos)
 
@@ -79,6 +81,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         alumno.hob = "pintar, natación"
         alumno.sexo = "M"
         alumno.puntaje = 0
+        alumno.superlike = 1
         formatearAlumnos(alumno)
         pickle.dump(alumno, arLoAlumnos)
 
@@ -93,6 +96,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         alumno.hob = "ajedrez, ciclismo"
         alumno.sexo = "H"
         alumno.puntaje = 0
+        alumno.superlike = 1
         formatearAlumnos(alumno)
         pickle.dump(alumno, arLoAlumnos)
 
@@ -107,6 +111,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         alumno.hob = "bailar, viajar"
         alumno.sexo = "M"
         alumno.puntaje = 0
+        alumno.superlike = 1
         formatearAlumnos(alumno)
         pickle.dump(alumno, arLoAlumnos)
 
@@ -179,6 +184,7 @@ def formatearAlumnos(alumnos):
     alumnos.bio = alumnos.bio.ljust(255, ' ')
     alumnos.hob = alumnos.hob.ljust(255, ' ')
     alumnos.puntaje = str(alumnos.puntaje).ljust(5, ' ')
+    alumnos.superlike = str(alumnos.superlike).ljust(5, ' ')
 def formatearModeradores(moderador):
     moderador.id = str(moderador.id).ljust(5, ' ')
     moderador.email = moderador.email.ljust(32, ' ')
@@ -671,56 +677,110 @@ def verCandidatos():
     
     meGusta = input("\nIngrese el nombre o id del estudiante que le gustaría hacer un Matcheo, o presione Enter para salir: ")
 
-    # Contar la cantidad de alumnos
-    arLoAlumnos.seek(0, 0)  # Nos aseguramos de que el puntero esté al principio
+    
+    arLoAlumnos.seek(0, 0)  
     while arLoAlumnos.tell() < os.path.getsize(arFiAlumnos):
         alumno = pickle.load(arLoAlumnos)
         cantidadAlumnos += 1
 
-    # Verificar que el nombre ingresado sea correcto
-    while meGusta != "":  # Mientras el usuario no presione Enter para salir
+    while meGusta != "":  
         encontrado = False
-        id_estudiante = None  # Inicializamos variable de control
+        id_estudiante = None  
         
         try:
             meGustaID = int(meGusta)
         except ValueError:
             meGustaID = None
 
-        # Reposicionamos el puntero al inicio del archivo antes de cada búsqueda
         arLoAlumnos.seek(0, 0)
         
-        # Ciclo para recorrer los alumnos otra vez
         for n in range(1, cantidadAlumnos + 1):  
-            if not encontrado:  # Solo procesar si no hemos encontrado aún
-                alumno = pickle.load(arLoAlumnos)  # Leer cada alumno desde el archivo
-                # Si el nombre o ID coinciden y el estado es True
+            if not encontrado:  # 
+                alumno = pickle.load(arLoAlumnos)  
+                
                 if (alumno.nombre.strip().lower() == meGusta.lower() or n == meGustaID) and alumno.estado: 
                     id_estudiante = alumno.id
-                    encontrado = True  # Marcamos que se ha encontrado el alumno
+                    encontrado = True  
 
-        # Después del ciclo, si se encontró el alumno con estado True
         if encontrado and id_estudiante is not None:
-            # Verificamos que el dador y el receptor no sean el mismo
+            
             if int(id) == int(id_estudiante):
                 print("No puedes dar like a ti mismo.")
             else:
                 if buscarLike(id, id_estudiante):
                     print(f"Usted ya le ha dado like a {alumno.nombre.strip()}")
                 else:
-                    print("")
-                    print(f"Le gustaría hacer un Matcheo con: {alumno.nombre.strip()}")
-                    # Guardar el like
-                    like.remitente = id
-                    like.destinatario = id_estudiante
-                    arLoLikes.seek(0, 2)
-                    pickle.dump(like, arLoLikes)
-                    arLoLikes.flush()
+                    
+                    arLoAlumnos.seek(0, 0)
+                    emisor_encontrado = False
+                    while arLoAlumnos.tell() < os.path.getsize(arFiAlumnos) and not emisor_encontrado:
+                        pos = arLoAlumnos.tell()  
+                        emisor = pickle.load(arLoAlumnos)  
+                        
+                        if emisor.id == id:  
+                            emisor_encontrado = True
+
+                    opc = ""
+                    while opc not in ["1", "2", "0"]: 
+                        cls()
+                        print(f"BONUS TRACK 2: \nDesea utilizar su SuperLike con: {alumno.nombre.strip()}?")
+                        print("1.   SuperLike")
+                        print("2.   Like")
+                        print("0.   Cancelar")
+                        opc = input("Ingrese opción: ")
+                    
+                    if opc == "1":
+                        # Este es el código donde hacemos la verificación del superlike y guardamos la información
+                        print(f"Superlike actual del emisor: {emisor.superlike}")  # Verifica el valor antes de restar
+                        input(f"Tipo de superlike: {type(emisor.superlike)}")  # Confirma el tipo de dato
+
+                        # Verificación y manejo de SuperLike
+                        if emisor.superlike.strip() == "1":  # Verificar que sea cadena con un solo dígito
+                            print(f"\nUsted ha dado SuperLike a: {alumno.nombre.strip()}")
+
+                            # Guardar el SuperLike (like de ida)
+                            like.remitente = id
+                            like.destinatario = id_estudiante
+                            arLoLikes.seek(0, 2)  # Ir al final del archivo para añadir
+                            pickle.dump(like, arLoLikes)
+                            arLoLikes.flush()  # Asegurarse de que los datos se escriben en el archivo
+
+                            # Guardar el SuperLike de vuelta (like de vuelta)
+                            like.remitente = id_estudiante
+                            like.destinatario = id
+                            pickle.dump(like, arLoLikes)  # Añadir el SuperLike de vuelta
+                            arLoLikes.flush()  # Asegurarse de que los datos se escriben en el archivo
+
+                            print("SuperLike guardado exitosamente.")
+
+                            # Convertir el superlike del emisor a número, restar 1 y convertirlo de vuelta a cadena
+                            nuevo_superlike = str(int(emisor.superlike.strip()) - 1)  # Convertir a entero, restar y volver a cadena
+                            emisor.superlike = nuevo_superlike  # Guardar el nuevo valor como cadena
+                            print(f"Nuevo valor de superlike: {emisor.superlike}")
+
+                            # Actualizar el registro del emisor en el archivo de alumnos
+                            arLoAlumnos.seek(pos, 0)  # Volver a la posición del registro
+                            formatearAlumnos(emisor)  # Asegurarse de que el registro esté formateado
+                            pickle.dump(emisor, arLoAlumnos)  # Guardar el registro actualizado
+                            arLoAlumnos.flush()
+
+                            print("Perfil del emisor actualizado con el nuevo superlike.")
+                        else:
+                            print("\nNo tienes suficientes SuperLikes.")
+
+
+
+                    elif opc == "2":
+                        print(f"\nUsted ha dado like a: {alumno.nombre.strip()}")
+                        # Guardar el like
+                        like.remitente = id
+                        like.destinatario = id_estudiante
+                        arLoLikes.seek(0, 2)
+                        pickle.dump(like, arLoLikes)
+                        arLoLikes.flush()
 
         else:
             print("No se encontró el estudiante con ese nombre o ID, o el estudiante no está activo.")
-
-        # Pedir nueva entrada para otro estudiante o salir
         meGusta = input("\nIngrese el nombre o id del estudiante que le gustaría hacer un Matcheo, o presione Enter para salir: ")
 
 def verificarMatch(remitente, destinatario):
@@ -743,32 +803,34 @@ def reportesEstadisticos():
     likesRecibidosNoDevueltos = 0
     likesDadosNoDevueltos = 0
     matcheos = 0
-    totalCandidatos = -1
+    totalCandidatos = 0  # Candidatos distintos al usuario logueado
 
+    arLoAlumnos.seek(0, 0)  # Asegurarse de empezar desde el principio del archivo de alumnos
     while arLoAlumnos.tell() < os.path.getsize(arFiAlumnos):
         alumno = pickle.load(arLoAlumnos)
-        if alumno.estado:
+        # Contar los candidatos (alumnos activos diferentes al usuario actual)
+        if alumno.estado and alumno.id != id:
             totalCandidatos += 1
-    arLoLikes.seek(0, 0)
+
+    arLoLikes.seek(0, 0)  # Asegurarse de empezar desde el principio del archivo de likes
     while arLoLikes.tell() < os.path.getsize(arFiLikes):
         like = pickle.load(arLoLikes)
-        
+
         # Si el remitente es el usuario actual (id), es un like que diste
         if str(like.remitente).strip() == str(id).strip():
-            totalCandidatos += 1
             if not verificarMatch(like.remitente, like.destinatario):
-                likesDadosNoDevueltos += 1  # Aumentar el contador de likes dados y no recibidos
+                likesDadosNoDevueltos += 1  # Likes dados que no han sido devueltos
             else:
-                matcheos += 1  # Si hay match, aumentar el contador de matcheos
-        
+                matcheos += 1  # Likes que han sido matcheados
+
         # Si el destinatario es el usuario actual (id), es un like que recibiste
         elif str(like.destinatario).strip() == str(id).strip():
             if not verificarMatch(like.remitente, like.destinatario):
-                likesRecibidosNoDevueltos += 1  # Aumentar el contador de likes recibidos y no respondidos
-    
-    # Calcular el porcentaje de matcheos
+                likesRecibidosNoDevueltos += 1  # Likes recibidos y no respondidos
+
+    # Calcular el porcentaje de matcheos (sobre el total de candidatos activos)
     if totalCandidatos > 0:
-        probabilidad = (matcheos / totalCandidatos) * 100
+        probabilidad = (matcheos / (totalCandidatos-1)) * 100
     else:
         probabilidad = 0  # Si no hay candidatos, la probabilidad es 0
 
@@ -887,145 +949,6 @@ def reportes():
         else:
             input("id invalido")
         
-                
-
-'''def mostrarReportes():
-    hayreporte=False
-    alumno=Alumno()
-    reporte=Reporte()
-    idReporte=1
-    mostrarEstudiantes()
-    cantidadReportes=1
-    arLoReportes.seek(0,0)
-    while arLoReportes.tell() < os.path.getsize(arFiReportes):
-        reporte=pickle.load(arLoReportes)
-        if reporte.estado == 0:
-            hayreporte=True
-    if os.path.getsize(arFiReportes)!=0 and hayreporte:
-        arLoReportes.seek(0,0)
-        while arLoReportes.tell() < os.path.getsize(arFiReportes):
-            reporte=pickle.load(arLoReportes)
-            cantidadReportes+=1
-        arLoReportes.seek(0,0)
-        print("\n***** REPORTES *****\n")
-        for i in range (1,cantidadReportes):
-            pos=arLoReportes.tell()
-            reporte=pickle.load(arLoReportes)
-            print(pos, os.path.getsize(arFiReportes))
-            input()
-            arLoAlumnos.seek(0,0)
-            for i in range(0,reporte.id_reportante):
-                alumno=pickle.load(arLoAlumnos)
-                e1=alumno.estado
-            arLoAlumnos.seek(0,0)
-            for i in range(0,reporte.id_reportado):
-                alumno=pickle.load(arLoAlumnos)
-                e2=alumno.estado
-            if reporte.estado==0 and e1 and e2:
-                print(f"||Id Reporte: {idReporte}||Id reportante: {reporte.id_reportante}||Id reportado: {reporte.id_reportado}||Motivo del reporte: {reporte.razon_reporte.strip()}||Estado del reporte: {reporte.estado}||")
-            else:
-                reporte.estado=-1
-                print(pos, os.path.getsize(arFiReportes))
-                input()
-                arLoReportes.seek(pos,0)
-                pickle.dump(reporte,arLoReportes)
-                arLoReportes.flush()
-            idReporte+=1
-    else:
-        print("no hay reportes disponibles")
-   
-def reportes():
-    reporte=Reporte()
-    alumno=Alumno()
-    idreporte=-1
-    if os.path.getsize(arFiReportes)!=0:
-
-        while idreporte!=0:
-            posr=0
-            cls()
-            mostrarReportes()
-            cantRep = 0  # Reinicializa la cantidad de reportes en cada ciclo
-            arLoReportes.seek(0,0)
-            while arLoReportes.tell() < os.path.getsize(arFiReportes):
-                    reporte = pickle.load(arLoReportes)
-                    cantRep+=1
-            idreporte = input("\nIngrese el id del reporte que desea juzgar o 0 para volver: ")
-            es_entero = False
-
-            while not es_entero:
-                try:
-                    idreporte = int(idreporte)
-                    es_entero = True  # La condición se cumple si se puede convertir a entero
-                except ValueError:
-                    idreporte = input("El valor ingresado no es un número entero. Por favor, inténtelo de nuevo: ")
-
-            while not 0 <= idreporte <= cantRep:
-                cls()
-                mostrarReportes()
-                idreporte = input("\nIngrese el id del reporte que desea juzgar o 0 para volver: ")
-                es_entero = False
-
-                while not es_entero:
-                    try:
-                        idreporte = int(idreporte)
-                        es_entero = True  # La condición se cumple si se puede convertir a entero
-                    except ValueError:
-                        idreporte = input("El valor ingresado no es un número entero. Por favor, inténtelo de nuevo: ")
-
-
-            if idreporte==0:
-                print("Volviendo al menu anterior")
-                input()
-            else:
-                opc=""
-                print("1.Ignorar reporte")
-                print("2.Bloquear usuario reportado")
-                print("0.Volver")
-                opc=input("Como desea proceder con el reporte seleccionado?")
-                while opc<"0" or opc>"2":
-                    opc = input("Ingreso invalido, ingrese otra opción: ")
-                arLoReportes.seek(0,0)
-                for i in range(0,idreporte-1):
-                    reporte = pickle.load(arLoReportes)
-                    posr = arLoReportes.tell()
-                if opc=="1":
-                    reporte.estado=2
-                    pickle.dump(reporte, arLoReportes)
-                    arLoReportes.flush()
-                    idreporte=0
-                if opc=="2":
-                    idreportado = reporte.id_reportado
-                    arLoAlumnos.seek(0, 0)
-                    # Recorre hasta el registro del alumno con id == idreportado
-                    for i in range(0, idreportado):
-                        posa = arLoAlumnos.tell()  # Guarda la posición actual
-                        alumno = pickle.load(arLoAlumnos)
-
-                    # Cambia el estado del alumno
-                    alumno.estado = False
-
-                    # Mueve el puntero a la posición del alumno leído para sobrescribirlo
-                    arLoAlumnos.seek(posa)
-
-                    # Sobrescribe el registro del alumno en el archivo
-                    pickle.dump(alumno, arLoAlumnos)
-                    arLoAlumnos.flush()  # Asegura que los datos se escriban
-
-                    # Mueve el puntero a la posición del reporte leído para sobrescribirlo
-                    arLoReportes.seek(posr)
-
-                    # Actualiza el reporte
-                    reporte.estado = 1
-                    pickle.dump(reporte, arLoReportes)
-                    arLoReportes.flush()  # Asegura que los datos se escriban
-                    idreporte=0
-                if opc=="0":
-                    print("Regresando al menu anterior")
-                    input()    
-    else:
-        print("No hay reportes disponibles")
-        input()
-'''
 def mostrarModeradores():
     cantidadModeradores=1
     arLoModeradores.seek(0,0)
@@ -1328,9 +1251,9 @@ def Bonustrack1():
 
     input()
                                
-#Registro y login
 def registro():
     cls()
+    print("***** REGISTRO *****")
     alumno = Alumno()
 
     if os.path.getsize(arFiAlumnos) == 0:
@@ -1338,23 +1261,16 @@ def registro():
     else:
         arLoAlumnos.seek(0, 0)
 
-        # Calcular tamaño del registro
         alumno = pickle.load(arLoAlumnos)
         tamReg = arLoAlumnos.tell()
         tamArc = os.path.getsize(arFiAlumnos)
 
-        # Cantidad de registros
         cantReg = tamArc // tamReg
 
         id_alum = str(cantReg + 2)
-        # if len(id_alum) < 5:
-        #     alumno.id = str(id_alum.ljust(5, ' '))
-        # else:
         alumno.id = id_alum
-        
-        arLoAlumnos.seek(0, 2)  # Mover el puntero al final del archivo para agregar un nuevo registro
+        arLoAlumnos.seek(0, 2)  
 
-    # Verificar si el email ya está registrado en Alumnos, Moderadores, o Administradores
     email_valido = False
     while not email_valido:
         email = str(input("Ingrese correo electrónico (MAX. 32 Carac): \n"))
@@ -1390,19 +1306,19 @@ def registro():
     alumno.email = email
 
     # Solicitar y validar la contraseña
-    contraseña = input("Ingrese contraseña (MAX. 32 Carac): \n")
+    contraseña = input("\nIngrese contraseña (MAX. 32 Carac): \n")
     while len(contraseña) > 32:
         cls()
         print("MAXIMO 32 CARACTERES")
         contraseña = input("Ingrese contraseña (MAX. 32 Carac): \n")
-    while len(contraseña) < 8:
+    while len(contraseña) < 6:
         cls()
-        contraseña = input("Su contraseña debe tener mínimo 8 caracteres, intente nuevamente: \n")
+        contraseña = input("Su contraseña debe tener mínimo 6 caracteres, intente nuevamente: \n")
    
     alumno.contraseña = contraseña
 
     # Recolectar otros datos
-    nombre = str(input("Ingrese su nombre para finalizar el registro (MAX. 32 Carac): \n"))
+    nombre = str(input("\nIngrese su nombre (MAX. 32 Carac): \n"))
     while len(nombre) < 3:
         cls()
         nombre = input("Su nombre debe tener mínimo 3 caracteres, intente nuevamente:\n")
@@ -1414,11 +1330,10 @@ def registro():
     alumno.nombre = nombre
 
     # Fecha de nacimiento
-    fNacimiento = str(input("Ingrese su fecha de nacimiento (DD-MM-AAAA): "))
+    fNacimiento = str(input("\nIngrese su fecha de nacimiento (DD-MM-AAAA): "))
     fechaval = True
     while fechaval:
         if fechaValida(fNacimiento):
-            cls()
             fechaval = False
         else:
             print("Fecha ingresada no válida. Asegúrese de usar el formato DD-MM-AAAA, y una edad entre 18 y 122 años.")
@@ -1426,7 +1341,7 @@ def registro():
     alumno.fnac = fNacimiento
 
     # Biografía
-    bio = str(input("Ingrese biografía (MAX. 255 Carac): \n"))
+    bio = str(input("\nIngrese biografía (MAX. 255 Carac): \n"))
     while len(bio) > 255:
         cls()
         print("MAXIMO 255 CARACTERES")
@@ -1435,20 +1350,24 @@ def registro():
     alumno.bio = bio
     
     # Hobbies
-    hob = str(input("Ingrese hobbies (MAX. 255 Carac): \n"))
+    hob = str(input("\nIngrese hobbies (MAX. 255 Carac): \n"))
     while len(hob) > 255:
         cls()
         print("MAXIMO 255 CARACTERES")
         hob = str(input("Ingrese hobbies (MAX. 255 Carac): \n"))
-   
-        alumno.hob = hob
-
+    alumno.hob = hob
+    
+    sex = ""
+    while sex != "M" and sex != "H" and sex != "N":
+        sex = str(input("\nIngrese su sexo, M para mujer y H para hombre o N para no especificado\n"))
+    alumno.sexo = sex
     # Guardar el nuevo registro en el archivo
     alumno.puntaje = 0
+    alumno.superlike = 1
     formatearAlumnos(alumno)
     pickle.dump(alumno, arLoAlumnos)
     arLoAlumnos.flush()
-    input("Registro exitoso, presione Enter para continuar...")
+    input("\nRegistro exitoso, presione Enter para continuar...")
 
 def login():
     global id
@@ -1460,7 +1379,7 @@ def login():
 
     while not encontrado and maxint < 3:
         cls()
-        print("*****  *****\n")
+        print("***** LOGIN *****\n")
         print("Si realizas 3 intentos incorrectos, el programa se cerrará.")
         print(f"Intentos: {maxint}\n")
         email = input("Ingrese correo electrónico: ")
