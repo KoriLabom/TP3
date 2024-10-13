@@ -21,6 +21,8 @@ class Moderador:
         self.contraseña = " "
         self.estado = True
         self.nombre = " "
+        self.reportes_ignorados = 0
+        self.reportes_aceptados = 0
 class Administrador:
     def __init__ (self):
         self.id = 0
@@ -123,13 +125,15 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
     else:
         print("El archivo " + arFiModeradores + " no existía y fue creado")
         arLoModeradores = open(arFiModeradores, "w+b")
-        #Alumno 1
+        #Moderador 1
         moderador = Moderador()
         moderador.id = 1
         moderador.email = "moderador1@ayed.com"
         moderador.contraseña = "111222"
         moderador.estado = True
         moderador.nombre = "Mateo Labombarda"
+        moderador.reportes_ignorados = 0
+        moderador.reportes_aceptados = 0
 
         pickle.dump(moderador, arLoModeradores)
         input()
@@ -190,6 +194,8 @@ def formatearModeradores(moderador):
     moderador.email = moderador.email.ljust(32, ' ')
     moderador.contraseña = moderador.contraseña.ljust(32, ' ')
     moderador.nombre = moderador.nombre.ljust(32, ' ')
+    moderador.reportes_ignorados = str(moderador.reportes_ignorados).ljust(5, ' ')
+    moderador.reportes_aceptados = str(moderador.reportes_aceptados).ljust(5, ' ')
 def formatearAdministradores(administrador):
     administrador.id = str(administrador.id).ljust(5, ' ')
     administrador.email = administrador.email.ljust(32, ' ')
@@ -870,52 +876,75 @@ def mostrarReportes():
                 if e1 and e2:#si ambos estan activos y el estado es 0 se muestra el reporte
                     print(f"||Id Reporte: {idReporte}||Id reportante: {reporte.id_reportante}||Id reportado: {reporte.id_reportado}||Motivo del reporte: {reporte.razon_reporte.strip()}||Estado del reporte: {reporte.estado}||")      
                 else:#si alguno no esta activo
-                    reporte.estado=-1
+                    reporte.estado=(-1)
                     arLoReportes.seek(pos,0)
                     pickle.dump(reporte,arLoReportes)
                     arLoReportes.flush()
             idReporte+=1
 def reportes():
-    es_entero=False
-    idreporte=" "
-    while idreporte!="":
-        cantReportes=0
+    arLoModeradores.seek(0,0)
+    for i in range(0, id):
+        posm = arLoModeradores.tell()
+        moderador = pickle.load(arLoModeradores)
+    
+    es_entero = False
+    idreporte = " "
+    
+    while idreporte != "":
+        idreporte = " "
+        cantReportes = 0
         cls()
         mostrarReportes()
         idreporte = input("\nIngrese el id del reporte que desea juzgar o enter para volver: ")
+        
+        # Validación para asegurarse de que idreporte sea un entero válido o vacío
         while not es_entero:
-            try:
-                idreporte=int(idreporte)
-                es_entero=True
-            except ValueError:
-                if idreporte!="":
+            if idreporte == "":  # Permitir salida con Enter
+                es_entero = True
+            else:
+                try:
+                    idreporte = int(idreporte)
+                    es_entero = True
+                except ValueError:
                     cls()
                     mostrarReportes()
                     idreporte = input("El valor ingresado no es un número entero. Por favor, inténtelo de nuevo: ")
-                else:
-                    es_entero=True
+
+        # Reseteamos el valor de es_entero para futuras entradas
+        es_entero = False
+        
         arLoReportes.seek(0,0)
         while arLoReportes.tell() < os.path.getsize(arFiReportes):
-            reporte=pickle.load(arLoReportes)
-            cantReportes+=1
-        if idreporte!="" and (1<=idreporte)<=cantReportes:
+            reporte = pickle.load(arLoReportes)
+            cantReportes += 1
+
+        # Asegúrate de que idreporte es un entero antes de esta comparación
+        if isinstance(idreporte, int) and (1 <= idreporte <= cantReportes) and reporte.estado == 0:
             arLoReportes.seek(0,0)
-            for i in range(0,idreporte):
-                posr=arLoReportes.tell()
-                reporte=pickle.load(arLoReportes)
-            opc=""
+            for i in range(0, idreporte):
+                posr = arLoReportes.tell()
+                reporte = pickle.load(arLoReportes)
+            arLoReportes.seek(posr,0)
+            arLoModeradores.seek(posm, 0)
+            opc = ""
             print("1.Ignorar reporte")
             print("2.Bloquear usuario reportado")
             print("0.Volver")
-            opc=input("¿Como desea proceder con el reporte seleccionado?")
-            while opc<"0" or opc>"2":
-                opc = input("Ingreso invalido, ingrese otra opción: ")
-            if opc=="1":
-                reporte.estado=2
+            opc = input("¿Cómo desea proceder con el reporte seleccionado?")
+            
+            while opc < "0" or opc > "2":
+                opc = input("Ingreso inválido, ingrese otra opción: ")
+            
+            if opc == "1":
+                reporte.estado = 2
                 pickle.dump(reporte, arLoReportes)
                 arLoReportes.flush()
-                idreporte=""
-            if opc=="2":
+                moderador.reportes_ignorados += 1
+                pickle.dump(moderador, arLoModeradores)
+                arLoModeradores.flush()
+                idreporte = ""
+            
+            elif opc == "2":
                 idreportado = reporte.id_reportado
                 arLoAlumnos.seek(0, 0)
                 # Recorre hasta el registro del alumno con id == idreportado
@@ -925,22 +954,25 @@ def reportes():
                 # Cambia el estado del alumno
                 alumno.estado = False
                 # Mueve el puntero a la posición del alumno leído para sobrescribirlo
-                arLoAlumnos.seek(posa)
+                arLoAlumnos.seek(posa,0)
                 # Sobrescribe el registro del alumno en el archivo
                 pickle.dump(alumno, arLoAlumnos)
                 arLoAlumnos.flush()  # Asegura que los datos se escriban
-                # Mueve el puntero a la posición del reporte leído para sobrescribirlo
-                arLoReportes.seek(posr,0)
+
                 # Actualiza el reporte
                 reporte.estado = 1
                 pickle.dump(reporte, arLoReportes)
                 arLoReportes.flush()  # Asegura que los datos se escriban
-                idreporte=""
-            if opc=="0":
-                idreporte=""
-
+                moderador.reportes_aceptados += 1
+                pickle.dump(moderador, arLoModeradores)
+                arLoModeradores.flush()
+                idreporte = ""
+            
+            elif opc == "0":
+                idreporte = ""
         else:
-            input("id invalido")
+            input("ID inválido")
+
 
 def mostrarModeradores():
     cantidadModeradores=1
@@ -1201,6 +1233,12 @@ def eliminarUsuario():
             input("Presione Enter para continuar...")
 def reportesEstadisticosAdmin():
     cls()
+    masIgnorados=""
+    masAceptados=""
+    masProcesados=""
+    mi=0
+    ma=0
+    mp=0
     cantReportes=0
     cantReportesIgnorados=0
     cantReportesAceptados=0
@@ -1215,6 +1253,18 @@ def reportesEstadisticosAdmin():
             cantReportesAceptados+=1
         if reporte.estado==-1:
             cantReportesDescartados+=1
+    arLoModeradores.seek(0,0)
+    while arLoModeradores.tell()<os.path.getsize(arFiModeradores):
+        moderador=pickle.load(arLoModeradores)
+        if moderador.reportes_ignorados >= mi:
+            mi=moderador.reportes_ignorados
+            masIgnorados=moderador.nombre.strip()
+        if moderador.reportes_aceptados >= ma:
+            ma=moderador.reportes_aceptados
+            masAceptados=moderador.nombre.strip()
+        if moderador.reportes_ignorados+moderador.reportes_aceptados >= mp:
+            mp=moderador.reportes_ignorados+moderador.reportes_aceptados
+            masProcesados=moderador.nombre.strip()
     print(f"Cantidad de reportes realizados por los estudiantes: {cantReportes}")
     if cantReportes==0:
         print(f"Porcentaje de reportes ignorados: 0")
@@ -1224,9 +1274,9 @@ def reportesEstadisticosAdmin():
         print(f"Porcentaje de reportes ignorados: {(cantReportesIgnorados/cantReportes)*100}")
         print(f"Porcentaje de reportes aceptados: {(cantReportesAceptados/cantReportes)*100}")
         print(f"Porcentaje de reportes descartados: {(cantReportesDescartados/cantReportes)*100}")
-    print(f"Moderador con mayor cantidad de reportes ignorados: ")
-    print(f"Moderador con mayor cantidad de reportes aceptados: ")
-    print(f"Moderador con mayor cantidad de reportes procesados: ")
+    print(f"Moderador con mayor cantidad de reportes ignorados: {masIgnorados}")
+    print(f"Moderador con mayor cantidad de reportes aceptados: {masAceptados}")
+    print(f"Moderador con mayor cantidad de reportes procesados: {masProcesados}")
     input()
 #bonus tracks
 def Bonustrack1():
