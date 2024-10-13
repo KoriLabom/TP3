@@ -13,6 +13,7 @@ class Alumno:
         self.sexo = "N" 
         self.puntaje=0
         self.superlike = 1
+        self.credito_revelar=1
 
 class Moderador:
     def __init__ (self):
@@ -21,6 +22,8 @@ class Moderador:
         self.contraseña = " "
         self.estado = True
         self.nombre = " "
+        self.reportes_ignorados = 0
+        self.reportes_aceptados = 0
 class Administrador:
     def __init__ (self):
         self.id = 0
@@ -67,6 +70,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         alumno.sexo = "H"
         alumno.puntaje = 0
         alumno.superlike = 1
+        alumno.credito_revelar = 1
         formatearAlumnos(alumno)
         pickle.dump(alumno, arLoAlumnos)
 
@@ -82,6 +86,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         alumno.sexo = "M"
         alumno.puntaje = 0
         alumno.superlike = 1
+        alumno.credito_revelar = 1
         formatearAlumnos(alumno)
         pickle.dump(alumno, arLoAlumnos)
 
@@ -97,6 +102,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         alumno.sexo = "H"
         alumno.puntaje = 0
         alumno.superlike = 1
+        alumno.credito_revelar = 1
         formatearAlumnos(alumno)
         pickle.dump(alumno, arLoAlumnos)
 
@@ -112,6 +118,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         alumno.sexo = "M"
         alumno.puntaje = 0
         alumno.superlike = 1
+        alumno.credito_revelar = 1
         formatearAlumnos(alumno)
         pickle.dump(alumno, arLoAlumnos)
 
@@ -123,13 +130,15 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
     else:
         print("El archivo " + arFiModeradores + " no existía y fue creado")
         arLoModeradores = open(arFiModeradores, "w+b")
-        #Alumno 1
+        #Moderador 1
         moderador = Moderador()
         moderador.id = 1
         moderador.email = "moderador1@ayed.com"
         moderador.contraseña = "111222"
         moderador.estado = True
         moderador.nombre = "Mateo Labombarda"
+        moderador.reportes_ignorados = 0
+        moderador.reportes_aceptados = 0
 
         pickle.dump(moderador, arLoModeradores)
         input()
@@ -185,11 +194,14 @@ def formatearAlumnos(alumnos):
     alumnos.hob = alumnos.hob.ljust(255, ' ')
     alumnos.puntaje = str(alumnos.puntaje).ljust(5, ' ')
     alumnos.superlike = str(alumnos.superlike).ljust(5, ' ')
+    alumnos.credito_revelar = str(alumnos.credito_revelar).ljust(5, ' ')
 def formatearModeradores(moderador):
     moderador.id = str(moderador.id).ljust(5, ' ')
     moderador.email = moderador.email.ljust(32, ' ')
     moderador.contraseña = moderador.contraseña.ljust(32, ' ')
     moderador.nombre = moderador.nombre.ljust(32, ' ')
+    moderador.reportes_ignorados = str(moderador.reportes_ignorados).ljust(5, ' ')
+    moderador.reportes_aceptados = str(moderador.reportes_aceptados).ljust(5, ' ')
 def formatearAdministradores(administrador):
     administrador.id = str(administrador.id).ljust(5, ' ')
     administrador.email = administrador.email.ljust(32, ' ')
@@ -270,16 +282,38 @@ def subMenuGestionarCandidatos(): #2 MUESTRA SUB MENU: GESTIONAR CANDIDATOS
     print("   1. Ver candidatos")
     print("   2. Reportar un candidato")
     print("   0. Volver.\n")
+def subMenuGestionarCandidatosCredito(): #2 MUESTRA SUB MENU: GESTIONAR CANDIDATOS
+    cls()
+    print("***** GESTIONAR CANDIDATOS *****\n")
+    print("   1. Ver candidatos")
+    print("   2. Revelar candidato")
+    print("   3. Reportar un candidato")
+    print("   0. Volver.\n")
 def gestCandidatos(): #GESTIONAR CANDIDATOS
+    alumno=Alumno()
     opc = ""  # asignación interna para obligar al mientras a que entre aunque sea una vez
     while (opc!="0"):
-        subMenuGestionarCandidatos()        
-        opc = input("\nIngrese una opción: ")
-        while (opc<"0" or opc >"2"):
-            opc = input("Ingreso inválido, ingrese otra opción: ")
-        match opc:
-            case "1": verCandidatos()
-            case "2": reportarCandidato()
+        arLoAlumnos.seek(0,0)
+        for i in range(0,id):
+            alumno=pickle.load(arLoAlumnos)
+        if alumno.credito_revelar>=1:
+            subMenuGestionarCandidatosCredito()        
+            opc = input("\nIngrese una opción: ")
+            while (opc<"0" or opc >"3"):
+                opc = input("Ingreso inválido, ingrese otra opción: ")
+            match opc:
+                case "1": verCandidatos()
+                case "2": revelarCandidato()
+                case "3": reportarCandidato()
+        else:
+            subMenuGestionarCandidatos()        
+            opc = input("\nIngrese una opción: ")
+            while (opc<"0" or opc >"2"):
+                opc = input("Ingreso inválido, ingrese otra opción: ")
+            match opc:
+                case "1": verCandidatos()
+                case "2": reportarCandidato()
+        
 def matcheos():
     cls()
     print("***** MATCHEOS *****\n")
@@ -302,14 +336,11 @@ def opcmenuMod():
     while(opc!= "0"):
         menuModerador()
         opc = input("\nIngrese una opción:  ")
-        while (opc<"0" or opc>"5"):
+        while (opc<"0" or opc>"2"):
             opc = input("ingreso inválido, ingrese otra opción: ")
         match opc:
             case "1": gestUsuarios()
             case "2": gestReportes()
-            case "3": Bonustrack1()
-            case "4": Bonustrack2()
-            case "5": Bonustrack3()
             case "0": maxint = 0
 def gestUsuarios():
     opc = ""
@@ -429,6 +460,7 @@ def finPrograma():
 #FIN MENUS
 
 #Funciones estudiantes
+
 def fechaValida(fechastr:str)->bool:
     try:
         fechanac = datetime.strptime(fechastr, '%d-%m-%Y').date()
@@ -665,8 +697,34 @@ def mostrarCandidatos():
         alumno=pickle.load(arLoAlumnos) 
         if alumno.estado and i != id:
             print(f"||Id:{i}||Nombre:{alumno.nombre.strip()}||Fecha de nacimiento:{alumno.fnac.strip()}||Edad:{calcularEdad(alumno.fnac.strip())}||Biografia:{alumno.bio.strip()}||Hobbies:{alumno.hob.strip()}||")
-
-
+def revelarCandidato():
+    alumno=Alumno()
+    cls()
+    n=1
+    opc =""
+    arLoAlumnos.seek(0,0)
+    for i in range(0,id):
+        pos=arLoAlumnos.tell()
+        alumno1=pickle.load(arLoAlumnos)
+    print(f"¿Esta seguro que desea revelar candidatos?(s/n) Se revelaran un maximo de 3 estudiantes que le hatan dado like y se consumira un credito. Actualmente tienes {alumno1.credito_revelar} creditos")
+    opc = input()
+    while opc != 's' and opc != 'n':
+        opc = input("Respuesta inválida. ¿desea revelar candidatos? (s/n): ")
+    if opc=="s":
+        arLoLikes.seek(0,0)
+        while arLoLikes.tell() < os.path.getsize(arFiLikes):
+            like=pickle.load(arLoLikes)
+            if int(str(like.destinatario).strip())==id and n<=3:
+                arLoAlumnos.seek(0,0)
+                for i in range(0,int(str(like.remitente).strip())):
+                    alumno=pickle.load(arLoAlumnos)
+                print(f"||Candidato: {n}||Nombre:{alumno.nombre.strip()}||Fecha de nacimiento:{alumno.fnac.strip()}||Edad:{calcularEdad(alumno.fnac.strip())}||Biografia:{alumno.bio.strip()}||Hobbies:{alumno.hob.strip()}||")
+                n+=1
+        alumno1.credito_revelar -= 1
+        arLoAlumnos.seek(pos,0)
+        pickle.dump(alumno1,arLoAlumnos)
+        arLoAlumnos.flush()
+        input()
 def verCandidatos():
     cls()
     cantidadAlumnos = 0
@@ -877,52 +935,75 @@ def mostrarReportes():
                 if e1 and e2:#si ambos estan activos y el estado es 0 se muestra el reporte
                     print(f"||Id Reporte: {idReporte}||Id reportante: {reporte.id_reportante}||Id reportado: {reporte.id_reportado}||Motivo del reporte: {reporte.razon_reporte.strip()}||Estado del reporte: {reporte.estado}||")      
                 else:#si alguno no esta activo
-                    reporte.estado=-1
+                    reporte.estado=(-1)
                     arLoReportes.seek(pos,0)
                     pickle.dump(reporte,arLoReportes)
                     arLoReportes.flush()
             idReporte+=1
 def reportes():
-    es_entero=False
-    idreporte=" "
-    while idreporte!="":
-        cantReportes=0
+    arLoModeradores.seek(0,0)
+    for i in range(0, id):
+        posm = arLoModeradores.tell()
+        moderador = pickle.load(arLoModeradores)
+    
+    es_entero = False
+    idreporte = " "
+    
+    while idreporte != "":
+        idreporte = " "
+        cantReportes = 0
         cls()
         mostrarReportes()
         idreporte = input("\nIngrese el id del reporte que desea juzgar o enter para volver: ")
+        
+        # Validación para asegurarse de que idreporte sea un entero válido o vacío
         while not es_entero:
-            try:
-                idreporte=int(idreporte)
-                es_entero=True
-            except ValueError:
-                if idreporte!="":
+            if idreporte == "":  # Permitir salida con Enter
+                es_entero = True
+            else:
+                try:
+                    idreporte = int(idreporte)
+                    es_entero = True
+                except ValueError:
                     cls()
                     mostrarReportes()
                     idreporte = input("El valor ingresado no es un número entero. Por favor, inténtelo de nuevo: ")
-                else:
-                    es_entero=True
+
+        # Reseteamos el valor de es_entero para futuras entradas
+        es_entero = False
+        
         arLoReportes.seek(0,0)
         while arLoReportes.tell() < os.path.getsize(arFiReportes):
-            reporte=pickle.load(arLoReportes)
-            cantReportes+=1
-        if idreporte!="" and (1<=int(idreporte)<=cantReportes):
+            reporte = pickle.load(arLoReportes)
+            cantReportes += 1
+
+        # Asegúrate de que idreporte es un entero antes de esta comparación
+        if isinstance(idreporte, int) and (1 <= idreporte <= cantReportes) and reporte.estado == 0:
             arLoReportes.seek(0,0)
-            for i in range(0,idreporte):
-                posr=arLoReportes.tell()
-                reporte=pickle.load(arLoReportes)
-            opc=""
+            for i in range(0, idreporte):
+                posr = arLoReportes.tell()
+                reporte = pickle.load(arLoReportes)
+            arLoReportes.seek(posr,0)
+            arLoModeradores.seek(posm, 0)
+            opc = ""
             print("1.Ignorar reporte")
             print("2.Bloquear usuario reportado")
             print("0.Volver")
-            opc=input("Como desea proceder con el reporte seleccionado?")
-            while opc<"0" or opc>"2":
-                opc = input("Ingreso invalido, ingrese otra opción: ")
-            if opc=="1":
-                reporte.estado=2
+            opc = input("¿Cómo desea proceder con el reporte seleccionado?")
+            
+            while opc < "0" or opc > "2":
+                opc = input("Ingreso inválido, ingrese otra opción: ")
+            
+            if opc == "1":
+                reporte.estado = 2
                 pickle.dump(reporte, arLoReportes)
                 arLoReportes.flush()
-                idreporte=""
-            if opc=="2":
+                moderador.reportes_ignorados += 1
+                pickle.dump(moderador, arLoModeradores)
+                arLoModeradores.flush()
+                idreporte = ""
+            
+            elif opc == "2":
                 idreportado = reporte.id_reportado
                 arLoAlumnos.seek(0, 0)
                 # Recorre hasta el registro del alumno con id == idreportado
@@ -932,23 +1013,26 @@ def reportes():
                 # Cambia el estado del alumno
                 alumno.estado = False
                 # Mueve el puntero a la posición del alumno leído para sobrescribirlo
-                arLoAlumnos.seek(posa)
+                arLoAlumnos.seek(posa,0)
                 # Sobrescribe el registro del alumno en el archivo
                 pickle.dump(alumno, arLoAlumnos)
                 arLoAlumnos.flush()  # Asegura que los datos se escriban
-                # Mueve el puntero a la posición del reporte leído para sobrescribirlo
-                arLoReportes.seek(posr,0)
+
                 # Actualiza el reporte
                 reporte.estado = 1
                 pickle.dump(reporte, arLoReportes)
                 arLoReportes.flush()  # Asegura que los datos se escriban
-                idreporte=""
-            if opc=="0":
-                idreporte=""
-
+                moderador.reportes_aceptados += 1
+                pickle.dump(moderador, arLoModeradores)
+                arLoModeradores.flush()
+                idreporte = ""
+            
+            elif opc == "0":
+                idreporte = ""
         else:
-            input("id invalido")
-        
+            input("ID inválido")
+
+
 def mostrarModeradores():
     cantidadModeradores=1
     arLoModeradores.seek(0,0)
@@ -978,15 +1062,13 @@ def opcmenuAdmin():
     while(opc!= "0"):
         menuAdmin()
         opc = input("\nIngrese una opción:  ")
-        while (opc<"0" or opc>"6"):
+        while (opc<"0" or opc>"4"):
             opc = input("ingreso inválido, ingrese otra opción: ")
         match opc:
             case "1": gestUsuariosAdm()
-            case "2": gestReportes()
-            case "3": enConstruccion()
+            case "2": enConstruccion()
+            case "3": reportesEstadisticosAdmin()
             case "4": Bonustrack1()
-            case "5": Bonustrack2()
-            case "6": Bonustrack3()
             case "0": maxint = 0
 def menuGestUsuariosAdm():
     cls()
@@ -1097,6 +1179,10 @@ def darAltaMod():
 
     # Guardar el nuevo registro en el archivo si no se activó la salida
     if not salir:
+        moderador.reportes_ignorados = 0
+        moderador.reportes_aceptados = 0
+        moderador.reportes_ignorados = str(moderador.reportes_ignorados).ljust(5, ' ')
+        moderador.reportes_aceptados = str(moderador.reportes_aceptados).ljust(5, ' ')
         pickle.dump(moderador, arLoModeradores)
         arLoModeradores.flush()
         print("Moderador dado de alta exitosamente.")
@@ -1206,7 +1292,53 @@ def eliminarUsuario():
         if opcion != "" and not usuario_encontrado:
             print("Usuario no encontrado.")
             input("Presione Enter para continuar...")
-
+def reportesEstadisticosAdmin():
+    cls()
+    masIgnorados=""
+    masAceptados=""
+    masProcesados=""
+    mi=0
+    ma=0
+    mp=0
+    cantReportes=0
+    cantReportesIgnorados=0
+    cantReportesAceptados=0
+    cantReportesDescartados=0
+    arLoReportes.seek(0,0)
+    while arLoReportes.tell()<os.path.getsize(arFiReportes):
+        reporte=pickle.load(arLoReportes)
+        cantReportes+=1
+        if reporte.estado==2:
+            cantReportesIgnorados+=1
+        if reporte.estado==1:
+            cantReportesAceptados+=1
+        if reporte.estado==-1:
+            cantReportesDescartados+=1
+    arLoModeradores.seek(0,0)
+    while arLoModeradores.tell()<os.path.getsize(arFiModeradores):
+        moderador=pickle.load(arLoModeradores)
+        if moderador.reportes_ignorados >= mi:
+            mi=moderador.reportes_ignorados
+            masIgnorados=moderador.nombre.strip()
+        if moderador.reportes_aceptados >= ma:
+            ma=moderador.reportes_aceptados
+            masAceptados=moderador.nombre.strip()
+        if moderador.reportes_ignorados+moderador.reportes_aceptados >= mp:
+            mp=moderador.reportes_ignorados+moderador.reportes_aceptados
+            masProcesados=moderador.nombre.strip()
+    print(f"Cantidad de reportes realizados por los estudiantes: {cantReportes}")
+    if cantReportes==0:
+        print(f"Porcentaje de reportes ignorados: 0")
+        print(f"Porcentaje de reportes aceptados: 0")
+        print(f"Porcentaje de reportes descartados: 0")        
+    else:
+        print(f"Porcentaje de reportes ignorados: {(cantReportesIgnorados/cantReportes)*100}")
+        print(f"Porcentaje de reportes aceptados: {(cantReportesAceptados/cantReportes)*100}")
+        print(f"Porcentaje de reportes descartados: {(cantReportesDescartados/cantReportes)*100}")
+    print(f"Moderador con mayor cantidad de reportes ignorados: {masIgnorados}")
+    print(f"Moderador con mayor cantidad de reportes aceptados: {masAceptados}")
+    print(f"Moderador con mayor cantidad de reportes procesados: {masProcesados}")
+    input()
 #bonus tracks
 def Bonustrack1():
     idActual=0
@@ -1362,6 +1494,7 @@ def registro():
         sex = str(input("\nIngrese su sexo, M para mujer y H para hombre o N para no especificado\n"))
     alumno.sexo = sex
     # Guardar el nuevo registro en el archivo
+    alumno.credito_revelar = 1
     alumno.puntaje = 0
     alumno.superlike = 1
     formatearAlumnos(alumno)
