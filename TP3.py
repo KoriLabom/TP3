@@ -11,6 +11,7 @@ class Alumno:
         self.bio = " "
         self.hob = " "
         self.sexo = "N" 
+        self.puntaje=0
 
 class Moderador:
     def __init__ (self):
@@ -63,6 +64,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         alumno.bio = "Estudiante de ingeniería."
         alumno.hob = "leer, fútbol"
         alumno.sexo = "H"
+        alumno.puntaje = 0
         formatearAlumnos(alumno)
         pickle.dump(alumno, arLoAlumnos)
 
@@ -76,6 +78,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         alumno.bio = "Estudiante de medicina."
         alumno.hob = "pintar, natación"
         alumno.sexo = "M"
+        alumno.puntaje = 0
         formatearAlumnos(alumno)
         pickle.dump(alumno, arLoAlumnos)
 
@@ -89,6 +92,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         alumno.bio = "Estudiante de economía."
         alumno.hob = "ajedrez, ciclismo"
         alumno.sexo = "H"
+        alumno.puntaje = 0
         formatearAlumnos(alumno)
         pickle.dump(alumno, arLoAlumnos)
 
@@ -102,6 +106,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         alumno.bio = "Estudiante de derecho."
         alumno.hob = "bailar, viajar"
         alumno.sexo = "M"
+        alumno.puntaje = 0
         formatearAlumnos(alumno)
         pickle.dump(alumno, arLoAlumnos)
 
@@ -173,6 +178,7 @@ def formatearAlumnos(alumnos):
     alumnos.fnac = alumnos.fnac.ljust(10, ' ')
     alumnos.bio = alumnos.bio.ljust(255, ' ')
     alumnos.hob = alumnos.hob.ljust(255, ' ')
+    alumnos.puntaje = str(alumnos.puntaje).ljust(5, ' ')
 def formatearModeradores(moderador):
     moderador.id = str(moderador.id).ljust(5, ' ')
     moderador.email = moderador.email.ljust(32, ' ')
@@ -283,9 +289,6 @@ def menuModerador():
     print("*****  MENÚ MODERADOR *****\n")
     print("   1. Gestionar Usuarios")
     print("   2. Gestionar Reportes")
-    print("   3. Bonus Track 1")
-    print("   4. Bonus Track 2")
-    print("   5. Bonus Track 3")
     print("   0. Salir")
 def opcmenuMod():
     global maxint
@@ -1042,6 +1045,9 @@ def menuAdmin():
     print("   1. Gestionar Usuarios")
     print("   2. Gestionar Reportes")
     print("   3. Reportes Estadísticos")
+    print("   4. Bonus Track 1")
+    print("   5. Bonus Track 2")
+    print("   6. Bonus Track 3")
     print("   0. Salir")
 def opcmenuAdmin():
     global maxint
@@ -1278,6 +1284,50 @@ def eliminarUsuario():
             print("Usuario no encontrado.")
             input("Presione Enter para continuar...")
 
+#bonus tracks
+def Bonustrack1():
+    idActual=0
+    alumno=Alumno()
+    like=Like()
+    arLoAlumnos.seek(0,0)
+    while arLoAlumnos.tell()<os.path.getsize(arFiAlumnos):#recorre archivo alumnos
+        idActual+=1
+        racha=0
+        posAlumno=arLoAlumnos.tell()
+        alumno = pickle.load(arLoAlumnos)
+        if alumno.estado:#si el alumno esta activo recorre el archivo likes
+            likeDevuelto = False
+            arLoLikes.seek(0,0)
+            while arLoLikes.tell()<os.path.getsize(arFiLikes):
+                likepos=arLoLikes.tell()
+                like = pickle.load(arLoLikes)
+                if str(like.remitente).strip() == str(alumno.id).strip():#si el remitente de un like es el alumno actual
+                    destinatario=like.destinatario
+                    arLoLikes.seek(0,0)
+                    while arLoLikes.tell()<os.path.getsize(arFiLikes):#busca el like correspondido
+                        like = pickle.load(arLoLikes)
+                        if verificarMatch(like.remitente,destinatario):
+                            likeDevuelto = True
+                    if likeDevuelto:#si le devuelven el like
+                        if racha<3:#y la racha es menor a 3 le suma un punto y extiende la racha
+                            alumno.puntaje=int(alumno.puntaje.strip())+1
+                            racha+=1
+                        else:#y la racha es mayor o igual a 3 le suma 2 pusntos y anade rtacha
+                            alumno.puntaje=int(alumno.puntaje.strip())+2
+                            racha+=1
+                    else:#si no le devolvieron el like reinicia racha y le resta un punto
+                        alumno.puntaje=int(alumno.puntaje.strip())-1
+                        racha=0
+                    arLoAlumnos.seek(posAlumno,0)
+                    formatearAlumnos(alumno)
+                    pickle.dump(alumno,arLoAlumnos)
+                    arLoAlumnos.flush()
+            #muestra al primer alumno
+
+            print(f"||Id:{idActual}||Nombre:{alumno.nombre.strip()}||Puntaje:{str(alumno.puntaje).strip()}||")
+
+    input()
+                               
 #Registro y login
 def registro():
     cls()
@@ -1394,6 +1444,7 @@ def registro():
         alumno.hob = hob
 
     # Guardar el nuevo registro en el archivo
+    alumno.puntaje = 0
     formatearAlumnos(alumno)
     pickle.dump(alumno, arLoAlumnos)
     arLoAlumnos.flush()
