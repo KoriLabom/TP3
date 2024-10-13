@@ -1053,8 +1053,6 @@ def menuAdmin():
     print("   2. Gestionar Reportes")
     print("   3. Reportes Estadísticos")
     print("   4. Bonus Track 1")
-    print("   5. Bonus Track 2")
-    print("   6. Bonus Track 3")
     print("   0. Salir")
 def opcmenuAdmin():
     global maxint
