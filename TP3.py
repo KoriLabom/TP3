@@ -898,7 +898,7 @@ def reportes():
         while arLoReportes.tell() < os.path.getsize(arFiReportes):
             reporte=pickle.load(arLoReportes)
             cantReportes+=1
-        if idreporte!="" and (1<=int(idreporte)<=cantReportes):
+        if idreporte!="" and (1<=idreporte)<=cantReportes:
             arLoReportes.seek(0,0)
             for i in range(0,idreporte):
                 posr=arLoReportes.tell()
@@ -975,8 +975,8 @@ def opcmenuAdmin():
             opc = input("ingreso inválido, ingrese otra opción: ")
         match opc:
             case "1": gestUsuariosAdm()
-            case "2": gestReportes()
-            case "3": enConstruccion()
+            case "2": enConstruccion()
+            case "3": reportesEstadisticosAdmin()
             case "4": Bonustrack1()
             case "5": Bonustrack2()
             case "6": Bonustrack3()
@@ -1199,7 +1199,35 @@ def eliminarUsuario():
         if opcion != "" and not usuario_encontrado:
             print("Usuario no encontrado.")
             input("Presione Enter para continuar...")
-
+def reportesEstadisticosAdmin():
+    cls()
+    cantReportes=0
+    cantReportesIgnorados=0
+    cantReportesAceptados=0
+    cantReportesDescartados=0
+    arLoReportes.seek(0,0)
+    while arLoReportes.tell()<os.path.getsize(arFiReportes):
+        reporte=pickle.load(arLoReportes)
+        cantReportes+=1
+        if reporte.estado==2:
+            cantReportesIgnorados+=1
+        if reporte.estado==1:
+            cantReportesAceptados+=1
+        if reporte.estado==-1:
+            cantReportesDescartados+=1
+    print(f"Cantidad de reportes realizados por los estudiantes: {cantReportes}")
+    if cantReportes==0:
+        print(f"Porcentaje de reportes ignorados: 0")
+        print(f"Porcentaje de reportes aceptados: 0")
+        print(f"Porcentaje de reportes descartados: 0")        
+    else:
+        print(f"Porcentaje de reportes ignorados: {(cantReportesIgnorados/cantReportes)*100}")
+        print(f"Porcentaje de reportes aceptados: {(cantReportesAceptados/cantReportes)*100}")
+        print(f"Porcentaje de reportes descartados: {(cantReportesDescartados/cantReportes)*100}")
+    print(f"Moderador con mayor cantidad de reportes ignorados: ")
+    print(f"Moderador con mayor cantidad de reportes aceptados: ")
+    print(f"Moderador con mayor cantidad de reportes procesados: ")
+    input()
 #bonus tracks
 def Bonustrack1():
     idActual=0
