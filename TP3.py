@@ -186,6 +186,9 @@ def formatearAdministradores(administrador):
 def cls():
     os.system("cls")
 #MENUS y OPCIONES
+def enConstruccion():
+    print("menu en construccion")
+    input()
 def menuEstudiante(): #MUESTRA MENU PRINCIPAL
     cls()
     print(" ***** MENÚ ESTUDIANTE *****\n")
@@ -786,6 +789,105 @@ def mostrarEstudiantes():
         if alumno.estado:
             print(f"||Id:{i}||Nombre:{alumno.nombre.strip()}||Fecha de nacimiento:{alumno.fnac.strip()}||Edad:{calcularEdad(alumno.fnac.strip())}||Biografia:{alumno.bio.strip()}||Hobbies:{alumno.hob.strip()}||")
 def mostrarReportes():
+    idReporte=1
+    alumno=Alumno()
+    print("\n***** ESTUDIANTES *****\n")
+    reporte=Reporte()
+    arLoReportes.seek(0,0)
+    mostrarEstudiantes()
+    if os.path.getsize(arFiReportes)!=0: #entra si el archivo no esta vacio
+        print("\n***** REPORTES *****\n")
+        while arLoReportes.tell() < os.path.getsize(arFiReportes): #recorre el archivo
+            pos=arLoReportes.tell()
+            reporte=pickle.load(arLoReportes)#carga el primer reporte
+            arLoAlumnos.seek(0,0)
+            for i in range(0,reporte.id_reportante):#verifica que el reportante este activo
+                alumno=pickle.load(arLoAlumnos)
+            e1=alumno.estado
+            arLoAlumnos.seek(0,0)
+            for i in range(0,reporte.id_reportado):#verifica que el reportaod este activo
+                alumno=pickle.load(arLoAlumnos)
+            e2=alumno.estado
+            if reporte.estado==0:
+                if e1 and e2:#si ambos estan activos y el estado es 0 se muestra el reporte
+                    print(f"||Id Reporte: {idReporte}||Id reportante: {reporte.id_reportante}||Id reportado: {reporte.id_reportado}||Motivo del reporte: {reporte.razon_reporte.strip()}||Estado del reporte: {reporte.estado}||")      
+                else:#si alguno no esta activo
+                    reporte.estado=-1
+                    arLoReportes.seek(pos,0)
+                    pickle.dump(reporte,arLoReportes)
+                    arLoReportes.flush()
+            idReporte+=1
+def reportes():
+    es_entero=False
+    idreporte=" "
+    while idreporte!="":
+        cantReportes=0
+        cls()
+        mostrarReportes()
+        idreporte = input("\nIngrese el id del reporte que desea juzgar o enter para volver: ")
+        while not es_entero:
+            try:
+                idreporte=int(idreporte)
+                es_entero=True
+            except ValueError:
+                if idreporte!="":
+                    cls()
+                    mostrarReportes()
+                    idreporte = input("El valor ingresado no es un número entero. Por favor, inténtelo de nuevo: ")
+                else:
+                    es_entero=True
+        arLoReportes.seek(0,0)
+        while arLoReportes.tell() < os.path.getsize(arFiReportes):
+            reporte=pickle.load(arLoReportes)
+            cantReportes+=1
+        if idreporte!="" and (1<=int(idreporte)<=cantReportes):
+            arLoReportes.seek(0,0)
+            for i in range(0,idreporte):
+                posr=arLoReportes.tell()
+                reporte=pickle.load(arLoReportes)
+            opc=""
+            print("1.Ignorar reporte")
+            print("2.Bloquear usuario reportado")
+            print("0.Volver")
+            opc=input("Como desea proceder con el reporte seleccionado?")
+            while opc<"0" or opc>"2":
+                opc = input("Ingreso invalido, ingrese otra opción: ")
+            if opc=="1":
+                reporte.estado=2
+                pickle.dump(reporte, arLoReportes)
+                arLoReportes.flush()
+                idreporte=""
+            if opc=="2":
+                idreportado = reporte.id_reportado
+                arLoAlumnos.seek(0, 0)
+                # Recorre hasta el registro del alumno con id == idreportado
+                for i in range(0, idreportado):
+                    posa = arLoAlumnos.tell()  # Guarda la posición actual
+                    alumno = pickle.load(arLoAlumnos)
+                # Cambia el estado del alumno
+                alumno.estado = False
+                # Mueve el puntero a la posición del alumno leído para sobrescribirlo
+                arLoAlumnos.seek(posa)
+                # Sobrescribe el registro del alumno en el archivo
+                pickle.dump(alumno, arLoAlumnos)
+                arLoAlumnos.flush()  # Asegura que los datos se escriban
+                # Mueve el puntero a la posición del reporte leído para sobrescribirlo
+                arLoReportes.seek(posr,0)
+                # Actualiza el reporte
+                reporte.estado = 1
+                pickle.dump(reporte, arLoReportes)
+                arLoReportes.flush()  # Asegura que los datos se escriban
+                idreporte=""
+            if opc=="0":
+                idreporte=""
+
+        else:
+            input("id invalido")
+        
+                
+
+'''def mostrarReportes():
+    hayreporte=False
     alumno=Alumno()
     reporte=Reporte()
     idReporte=1
@@ -794,57 +896,59 @@ def mostrarReportes():
     arLoReportes.seek(0,0)
     while arLoReportes.tell() < os.path.getsize(arFiReportes):
         reporte=pickle.load(arLoReportes)
-        cantidadReportes+=1
-    arLoReportes.seek(0,0)
-    print("\n***** REPORTES *****\n")
-    for i in range (1,cantidadReportes):
-        reporte=pickle.load(arLoReportes)
-        pos=arLoReportes.tell()
-        arLoAlumnos.seek(0,0)
-        for i in range(0,reporte.id_reportante):
-            alumno=pickle.load(arLoAlumnos)
-            e1=alumno.estado
-        arLoAlumnos.seek(0,0)
-        for i in range(0,reporte.id_reportado):
-            alumno=pickle.load(arLoAlumnos)
-            e2=alumno.estado
-        if reporte.estado==0 and e1 and e2:
-            print(f"||Id Reporte: {idReporte}||Id reportante: {reporte.id_reportante}||Id reportado: {reporte.id_reportado}||Motivo del reporte: {reporte.razon_reporte.strip()}||Estado del reporte: {reporte.estado}||")
-        else:
-            reporte.estado=-1
-            arLoReportes.seek(pos,0)
-            pickle.dump(reporte,arLoReportes)
-            arLoReportes.flush()
-        idReporte+=1
+        if reporte.estado == 0:
+            hayreporte=True
+    if os.path.getsize(arFiReportes)!=0 and hayreporte:
+        arLoReportes.seek(0,0)
+        while arLoReportes.tell() < os.path.getsize(arFiReportes):
+            reporte=pickle.load(arLoReportes)
+            cantidadReportes+=1
+        arLoReportes.seek(0,0)
+        print("\n***** REPORTES *****\n")
+        for i in range (1,cantidadReportes):
+            pos=arLoReportes.tell()
+            reporte=pickle.load(arLoReportes)
+            print(pos, os.path.getsize(arFiReportes))
+            input()
+            arLoAlumnos.seek(0,0)
+            for i in range(0,reporte.id_reportante):
+                alumno=pickle.load(arLoAlumnos)
+                e1=alumno.estado
+            arLoAlumnos.seek(0,0)
+            for i in range(0,reporte.id_reportado):
+                alumno=pickle.load(arLoAlumnos)
+                e2=alumno.estado
+            if reporte.estado==0 and e1 and e2:
+                print(f"||Id Reporte: {idReporte}||Id reportante: {reporte.id_reportante}||Id reportado: {reporte.id_reportado}||Motivo del reporte: {reporte.razon_reporte.strip()}||Estado del reporte: {reporte.estado}||")
+            else:
+                reporte.estado=-1
+                print(pos, os.path.getsize(arFiReportes))
+                input()
+                arLoReportes.seek(pos,0)
+                pickle.dump(reporte,arLoReportes)
+                arLoReportes.flush()
+            idReporte+=1
+    else:
+        print("no hay reportes disponibles")
    
 def reportes():
-    cantRep=0
     reporte=Reporte()
     alumno=Alumno()
     idreporte=-1
-    while idreporte!=0:
-        cls()
-        mostrarReportes()
-        arLoReportes.seek(0,0)
-        while arLoReportes.tell() < os.path.getsize(arFiReportes):
-                reporte = pickle.load(arLoReportes)
-                cantRep+=1
-        idreporte = input("\nIngrese el id del reporte que desea juzgar o 0 para volver: ")
-        es_entero = False
+    if os.path.getsize(arFiReportes)!=0:
 
-        while not es_entero:
-            try:
-                idreporte = int(idreporte)
-                es_entero = True  # La condición se cumple si se puede convertir a entero
-            except ValueError:
-                idreporte = input("El valor ingresado no es un número entero. Por favor, inténtelo de nuevo: ")
-        
-        while not 0 <= idreporte <= cantRep:
+        while idreporte!=0:
+            posr=0
             cls()
             mostrarReportes()
+            cantRep = 0  # Reinicializa la cantidad de reportes en cada ciclo
+            arLoReportes.seek(0,0)
+            while arLoReportes.tell() < os.path.getsize(arFiReportes):
+                    reporte = pickle.load(arLoReportes)
+                    cantRep+=1
             idreporte = input("\nIngrese el id del reporte que desea juzgar o 0 para volver: ")
             es_entero = False
-            
+
             while not es_entero:
                 try:
                     idreporte = int(idreporte)
@@ -852,59 +956,77 @@ def reportes():
                 except ValueError:
                     idreporte = input("El valor ingresado no es un número entero. Por favor, inténtelo de nuevo: ")
 
+            while not 0 <= idreporte <= cantRep:
+                cls()
+                mostrarReportes()
+                idreporte = input("\nIngrese el id del reporte que desea juzgar o 0 para volver: ")
+                es_entero = False
 
-        if idreporte==0:
-            print("Volviendo al menu anterior")
-            input()
-        else:
-            opc=""
-            print("1.Ignorar reporte")
-            print("2.Bloquear usuario reportado")
-            print("0.Volver")
-            opc=input("Como desea proceder con el reporte seleccionado?")
-            while opc<"0" or opc>"2":
-                opc = input("Ingreso invalido, ingrese otra opción: ")
-            arLoReportes.seek(0,0)
-            for i in range(0,idreporte):
-                reporte = pickle.load(arLoReportes)
-                posr = arLoReportes.tell()
-            if opc=="1":
-                reporte.estado=2
-                pickle.dump(reporte, arLoReportes)
-                arLoReportes.flush()
-            if opc=="2":
-                idreportado = reporte.id_reportado
-                arLoAlumnos.seek(0, 0)
-                # Recorre hasta el registro del alumno con id == idreportado
-                for i in range(0, idreportado):
-                    posa = arLoAlumnos.tell()  # Guarda la posición actual
-                    alumno = pickle.load(arLoAlumnos)
-                
-                # Cambia el estado del alumno
-                alumno.estado = False
-                
-                # Mueve el puntero a la posición del alumno leído para sobrescribirlo
-                arLoAlumnos.seek(posa)
-                
-                # Sobrescribe el registro del alumno en el archivo
-                pickle.dump(alumno, arLoAlumnos)
-                arLoAlumnos.flush()  # Asegura que los datos se escriban
-                
-                # Mueve el puntero a la posición del reporte leído para sobrescribirlo
-                arLoReportes.seek(posr)
+                while not es_entero:
+                    try:
+                        idreporte = int(idreporte)
+                        es_entero = True  # La condición se cumple si se puede convertir a entero
+                    except ValueError:
+                        idreporte = input("El valor ingresado no es un número entero. Por favor, inténtelo de nuevo: ")
 
-                # Actualiza el reporte
-                reporte.estado = 1
-                pickle.dump(reporte, arLoReportes)
-                arLoReportes.flush()  # Asegura que los datos se escriban
 
-            if opc=="0":
-                print("Regresando al menu anterior")
-                input()    
+            if idreporte==0:
+                print("Volviendo al menu anterior")
+                input()
+            else:
+                opc=""
+                print("1.Ignorar reporte")
+                print("2.Bloquear usuario reportado")
+                print("0.Volver")
+                opc=input("Como desea proceder con el reporte seleccionado?")
+                while opc<"0" or opc>"2":
+                    opc = input("Ingreso invalido, ingrese otra opción: ")
+                arLoReportes.seek(0,0)
+                for i in range(0,idreporte-1):
+                    reporte = pickle.load(arLoReportes)
+                    posr = arLoReportes.tell()
+                if opc=="1":
+                    reporte.estado=2
+                    pickle.dump(reporte, arLoReportes)
+                    arLoReportes.flush()
+                    idreporte=0
+                if opc=="2":
+                    idreportado = reporte.id_reportado
+                    arLoAlumnos.seek(0, 0)
+                    # Recorre hasta el registro del alumno con id == idreportado
+                    for i in range(0, idreportado):
+                        posa = arLoAlumnos.tell()  # Guarda la posición actual
+                        alumno = pickle.load(arLoAlumnos)
+
+                    # Cambia el estado del alumno
+                    alumno.estado = False
+
+                    # Mueve el puntero a la posición del alumno leído para sobrescribirlo
+                    arLoAlumnos.seek(posa)
+
+                    # Sobrescribe el registro del alumno en el archivo
+                    pickle.dump(alumno, arLoAlumnos)
+                    arLoAlumnos.flush()  # Asegura que los datos se escriban
+
+                    # Mueve el puntero a la posición del reporte leído para sobrescribirlo
+                    arLoReportes.seek(posr)
+
+                    # Actualiza el reporte
+                    reporte.estado = 1
+                    pickle.dump(reporte, arLoReportes)
+                    arLoReportes.flush()  # Asegura que los datos se escriban
+                    idreporte=0
+                if opc=="0":
+                    print("Regresando al menu anterior")
+                    input()    
+    else:
+        print("No hay reportes disponibles")
+        input()
+'''
 def mostrarModeradores():
     cantidadModeradores=1
     arLoModeradores.seek(0,0)
-    while arLoModeradores.tell() < os.path.getsize(arFiModeradore):
+    while arLoModeradores.tell() < os.path.getsize(arFiModeradores):
         moderador=pickle.load(arLoModeradores)
         cantidadModeradores+=1
     arLoModeradores.seek(0,0)
@@ -932,7 +1054,7 @@ def opcmenuAdmin():
         match opc:
             case "1": gestUsuariosAdm()
             case "2": gestReportes()
-            case "3": repEstadisticos()
+            case "3": enConstruccion()
             case "4": Bonustrack1()
             case "5": Bonustrack2()
             case "6": Bonustrack3()
