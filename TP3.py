@@ -12,6 +12,7 @@ class Alumno:
         self.hob = " "
         self.sexo = "N" 
         self.puntaje=0
+        self.credito_revelar=1
 
 class Moderador:
     def __init__ (self):
@@ -65,6 +66,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         alumno.hob = "leer, fútbol"
         alumno.sexo = "H"
         alumno.puntaje = 0
+        alumno.credito_revelar = 1
         formatearAlumnos(alumno)
         pickle.dump(alumno, arLoAlumnos)
 
@@ -79,6 +81,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         alumno.hob = "pintar, natación"
         alumno.sexo = "M"
         alumno.puntaje = 0
+        alumno.credito_revelar = 1
         formatearAlumnos(alumno)
         pickle.dump(alumno, arLoAlumnos)
 
@@ -93,6 +96,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         alumno.hob = "ajedrez, ciclismo"
         alumno.sexo = "H"
         alumno.puntaje = 0
+        alumno.credito_revelar = 1
         formatearAlumnos(alumno)
         pickle.dump(alumno, arLoAlumnos)
 
@@ -107,6 +111,7 @@ def inicializarArchivos(): #Abre o Crea (si no existen) TODOS los archivos
         alumno.hob = "bailar, viajar"
         alumno.sexo = "M"
         alumno.puntaje = 0
+        alumno.credito_revelar = 1
         formatearAlumnos(alumno)
         pickle.dump(alumno, arLoAlumnos)
 
@@ -179,6 +184,7 @@ def formatearAlumnos(alumnos):
     alumnos.bio = alumnos.bio.ljust(255, ' ')
     alumnos.hob = alumnos.hob.ljust(255, ' ')
     alumnos.puntaje = str(alumnos.puntaje).ljust(5, ' ')
+    alumnos.puntaje = str(alumnos.credito_revelar).ljust(5, ' ')
 def formatearModeradores(moderador):
     moderador.id = str(moderador.id).ljust(5, ' ')
     moderador.email = moderador.email.ljust(32, ' ')
@@ -264,16 +270,38 @@ def subMenuGestionarCandidatos(): #2 MUESTRA SUB MENU: GESTIONAR CANDIDATOS
     print("   1. Ver candidatos")
     print("   2. Reportar un candidato")
     print("   0. Volver.\n")
+def subMenuGestionarCandidatosCredito(): #2 MUESTRA SUB MENU: GESTIONAR CANDIDATOS
+    cls()
+    print("***** GESTIONAR CANDIDATOS *****\n")
+    print("   1. Ver candidatos")
+    print("   2. Revelar candidato")
+    print("   3. Reportar un candidato")
+    print("   0. Volver.\n")
 def gestCandidatos(): #GESTIONAR CANDIDATOS
+    alumno=Alumno()
     opc = ""  # asignación interna para obligar al mientras a que entre aunque sea una vez
     while (opc!="0"):
-        subMenuGestionarCandidatos()        
-        opc = input("\nIngrese una opción: ")
-        while (opc<"0" or opc >"2"):
-            opc = input("Ingreso inválido, ingrese otra opción: ")
-        match opc:
-            case "1": verCandidatos()
-            case "2": reportarCandidato()
+        arLoAlumnos.seek(0,0)
+        for i in range(0,id):
+            alumno=pickle.load(arLoAlumnos)
+        if alumno.credito_revelar>=1:
+            subMenuGestionarCandidatosCredito()        
+            opc = input("\nIngrese una opción: ")
+            while (opc<"0" or opc >"3"):
+                opc = input("Ingreso inválido, ingrese otra opción: ")
+            match opc:
+                case "1": verCandidatos()
+                case "2": revelarCandidato()
+                case "3": reportarCandidato()
+        else:
+            subMenuGestionarCandidatos()        
+            opc = input("\nIngrese una opción: ")
+            while (opc<"0" or opc >"2"):
+                opc = input("Ingreso inválido, ingrese otra opción: ")
+            match opc:
+                case "1": verCandidatos()
+                case "2": reportarCandidato()
+        
 def matcheos():
     cls()
     print("***** MATCHEOS *****\n")
@@ -423,6 +451,7 @@ def finPrograma():
 #FIN MENUS
 
 #Funciones estudiantes
+
 def fechaValida(fechastr:str)->bool:
     try:
         fechanac = datetime.strptime(fechastr, '%d-%m-%Y').date()
@@ -659,8 +688,34 @@ def mostrarCandidatos():
         alumno=pickle.load(arLoAlumnos) 
         if alumno.estado and i != id:
             print(f"||Id:{i}||Nombre:{alumno.nombre.strip()}||Fecha de nacimiento:{alumno.fnac.strip()}||Edad:{calcularEdad(alumno.fnac.strip())}||Biografia:{alumno.bio.strip()}||Hobbies:{alumno.hob.strip()}||")
-
-
+def revelarCandidato():
+    alumno=Alumno()
+    cls()
+    n=1
+    opc =""
+    arLoAlumnos.seek(0,0)
+    for i in range(0,id):
+        pos=arLoAlumnos.tell()
+        alumno1=pickle.load(arLoAlumnos)
+    print(f"¿Esta seguro que desea revelar candidatos?(s/n) Se revelaran un maximo de 3 estudiantes que le hatan dado like y se consumira un credito. Actualmente tienes {alumno1.credito_revelar} creditos")
+    opc = input()
+    while opc != 's' and opc != 'n':
+        opc = input("Respuesta inválida. ¿desea revelar candidatos? (s/n): ")
+    if opc=="s":
+        arLoLikes.seek(0,0)
+        while arLoLikes.tell() < os.path.getsize(arFiLikes):
+            like=pickle.load(arLoLikes)
+            if int(str(like.destinatario).strip())==id and n<=3:
+                arLoAlumnos.seek(0,0)
+                for i in range(0,int(str(like.remitente).strip())):
+                    alumno=pickle.load(arLoAlumnos)
+                print(f"||Candidato: {n}||Nombre:{alumno.nombre.strip()}||Fecha de nacimiento:{alumno.fnac.strip()}||Edad:{calcularEdad(alumno.fnac.strip())}||Biografia:{alumno.bio.strip()}||Hobbies:{alumno.hob.strip()}||")
+                n+=1
+        alumno1.credito_revelar -= 1
+        arLoAlumnos.seek(pos,0)
+        pickle.dump(alumno1,arLoAlumnos)
+        arLoAlumnos.flush()
+        input()
 def verCandidatos():
     cls()
     cantidadAlumnos = 0
@@ -852,7 +907,7 @@ def reportes():
             print("1.Ignorar reporte")
             print("2.Bloquear usuario reportado")
             print("0.Volver")
-            opc=input("Como desea proceder con el reporte seleccionado?")
+            opc=input("¿Como desea proceder con el reporte seleccionado?")
             while opc<"0" or opc>"2":
                 opc = input("Ingreso invalido, ingrese otra opción: ")
             if opc=="1":
@@ -886,146 +941,7 @@ def reportes():
 
         else:
             input("id invalido")
-        
-                
 
-'''def mostrarReportes():
-    hayreporte=False
-    alumno=Alumno()
-    reporte=Reporte()
-    idReporte=1
-    mostrarEstudiantes()
-    cantidadReportes=1
-    arLoReportes.seek(0,0)
-    while arLoReportes.tell() < os.path.getsize(arFiReportes):
-        reporte=pickle.load(arLoReportes)
-        if reporte.estado == 0:
-            hayreporte=True
-    if os.path.getsize(arFiReportes)!=0 and hayreporte:
-        arLoReportes.seek(0,0)
-        while arLoReportes.tell() < os.path.getsize(arFiReportes):
-            reporte=pickle.load(arLoReportes)
-            cantidadReportes+=1
-        arLoReportes.seek(0,0)
-        print("\n***** REPORTES *****\n")
-        for i in range (1,cantidadReportes):
-            pos=arLoReportes.tell()
-            reporte=pickle.load(arLoReportes)
-            print(pos, os.path.getsize(arFiReportes))
-            input()
-            arLoAlumnos.seek(0,0)
-            for i in range(0,reporte.id_reportante):
-                alumno=pickle.load(arLoAlumnos)
-                e1=alumno.estado
-            arLoAlumnos.seek(0,0)
-            for i in range(0,reporte.id_reportado):
-                alumno=pickle.load(arLoAlumnos)
-                e2=alumno.estado
-            if reporte.estado==0 and e1 and e2:
-                print(f"||Id Reporte: {idReporte}||Id reportante: {reporte.id_reportante}||Id reportado: {reporte.id_reportado}||Motivo del reporte: {reporte.razon_reporte.strip()}||Estado del reporte: {reporte.estado}||")
-            else:
-                reporte.estado=-1
-                print(pos, os.path.getsize(arFiReportes))
-                input()
-                arLoReportes.seek(pos,0)
-                pickle.dump(reporte,arLoReportes)
-                arLoReportes.flush()
-            idReporte+=1
-    else:
-        print("no hay reportes disponibles")
-   
-def reportes():
-    reporte=Reporte()
-    alumno=Alumno()
-    idreporte=-1
-    if os.path.getsize(arFiReportes)!=0:
-
-        while idreporte!=0:
-            posr=0
-            cls()
-            mostrarReportes()
-            cantRep = 0  # Reinicializa la cantidad de reportes en cada ciclo
-            arLoReportes.seek(0,0)
-            while arLoReportes.tell() < os.path.getsize(arFiReportes):
-                    reporte = pickle.load(arLoReportes)
-                    cantRep+=1
-            idreporte = input("\nIngrese el id del reporte que desea juzgar o 0 para volver: ")
-            es_entero = False
-
-            while not es_entero:
-                try:
-                    idreporte = int(idreporte)
-                    es_entero = True  # La condición se cumple si se puede convertir a entero
-                except ValueError:
-                    idreporte = input("El valor ingresado no es un número entero. Por favor, inténtelo de nuevo: ")
-
-            while not 0 <= idreporte <= cantRep:
-                cls()
-                mostrarReportes()
-                idreporte = input("\nIngrese el id del reporte que desea juzgar o 0 para volver: ")
-                es_entero = False
-
-                while not es_entero:
-                    try:
-                        idreporte = int(idreporte)
-                        es_entero = True  # La condición se cumple si se puede convertir a entero
-                    except ValueError:
-                        idreporte = input("El valor ingresado no es un número entero. Por favor, inténtelo de nuevo: ")
-
-
-            if idreporte==0:
-                print("Volviendo al menu anterior")
-                input()
-            else:
-                opc=""
-                print("1.Ignorar reporte")
-                print("2.Bloquear usuario reportado")
-                print("0.Volver")
-                opc=input("Como desea proceder con el reporte seleccionado?")
-                while opc<"0" or opc>"2":
-                    opc = input("Ingreso invalido, ingrese otra opción: ")
-                arLoReportes.seek(0,0)
-                for i in range(0,idreporte-1):
-                    reporte = pickle.load(arLoReportes)
-                    posr = arLoReportes.tell()
-                if opc=="1":
-                    reporte.estado=2
-                    pickle.dump(reporte, arLoReportes)
-                    arLoReportes.flush()
-                    idreporte=0
-                if opc=="2":
-                    idreportado = reporte.id_reportado
-                    arLoAlumnos.seek(0, 0)
-                    # Recorre hasta el registro del alumno con id == idreportado
-                    for i in range(0, idreportado):
-                        posa = arLoAlumnos.tell()  # Guarda la posición actual
-                        alumno = pickle.load(arLoAlumnos)
-
-                    # Cambia el estado del alumno
-                    alumno.estado = False
-
-                    # Mueve el puntero a la posición del alumno leído para sobrescribirlo
-                    arLoAlumnos.seek(posa)
-
-                    # Sobrescribe el registro del alumno en el archivo
-                    pickle.dump(alumno, arLoAlumnos)
-                    arLoAlumnos.flush()  # Asegura que los datos se escriban
-
-                    # Mueve el puntero a la posición del reporte leído para sobrescribirlo
-                    arLoReportes.seek(posr)
-
-                    # Actualiza el reporte
-                    reporte.estado = 1
-                    pickle.dump(reporte, arLoReportes)
-                    arLoReportes.flush()  # Asegura que los datos se escriban
-                    idreporte=0
-                if opc=="0":
-                    print("Regresando al menu anterior")
-                    input()    
-    else:
-        print("No hay reportes disponibles")
-        input()
-'''
 def mostrarModeradores():
     cantidadModeradores=1
     arLoModeradores.seek(0,0)
@@ -1444,6 +1360,7 @@ def registro():
         alumno.hob = hob
 
     # Guardar el nuevo registro en el archivo
+    alumno.credito_revelar = 1
     alumno.puntaje = 0
     formatearAlumnos(alumno)
     pickle.dump(alumno, arLoAlumnos)
