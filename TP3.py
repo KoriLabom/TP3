@@ -957,9 +957,8 @@ def reportes():
         mostrarReportes()
         idreporte = input("\nIngrese el id del reporte que desea juzgar o enter para volver: ")
         
-        # Validación para asegurarse de que idreporte sea un entero válido o vacío
         while not es_entero:
-            if idreporte == "":  # Permitir salida con Enter
+            if idreporte == "":  
                 es_entero = True
             else:
                 try:
@@ -970,7 +969,6 @@ def reportes():
                     mostrarReportes()
                     idreporte = input("El valor ingresado no es un número entero. Por favor, inténtelo de nuevo: ")
 
-        # Reseteamos el valor de es_entero para futuras entradas
         es_entero = False
         
         arLoReportes.seek(0,0)
@@ -978,7 +976,6 @@ def reportes():
             reporte = pickle.load(arLoReportes)
             cantReportes += 1
 
-        # Asegúrate de que idreporte es un entero antes de esta comparación
         if isinstance(idreporte, int) and (1 <= idreporte <= cantReportes) and reporte.estado == 0:
             arLoReportes.seek(0,0)
             for i in range(0, idreporte):
@@ -1099,7 +1096,7 @@ def darAltaMod():
     tamArc = os.path.getsize(arFiModeradores)
     # Cantidad de registros
     cantReg = tamArc // tamReg
-    id_mod = str(cantReg + 2)
+    id_mod = str(cantReg + 1)
     if len(id_mod) < 5:
         moderador.id = str(id_mod.ljust(5, ' '))
     else:
@@ -1151,9 +1148,9 @@ def darAltaMod():
             elif len(contraseña) > 32:
                 cls()
                 print("MAXIMO 32 CARACTERES")
-            elif len(contraseña) < 8:
+            elif len(contraseña) < 6:
                 cls()
-                print("La contraseña debe tener mínimo 8 caracteres.")
+                print("La contraseña debe tener mínimo 6 caracteres.")
             else:
                 contraseña_valida = True
                 moderador.contraseña = contraseña.ljust(32, ' ')
@@ -1415,29 +1412,22 @@ def registro():
             cls()
             email = input("Su email debe tener mínimo 12 caracteres, intente nuevamente:\n")
 
-        # Comprobar el email en el archivo de Alumnos
         encontrado = buscarMailRep(email, arLoAlumnos)
 
-        # Si no se encuentra en Alumnos, buscar en Moderadores
         if encontrado == 1:
             encontrado = buscarMailRep(email, arLoModeradores)
 
-        # Si no se encuentra en Moderadores, buscar en Administradores
         if encontrado == 1:
             encontrado = buscarMailRep(email, arLoAdmin)
 
-        # Si el email no se encuentra en ninguno de los archivos, es válido
         if encontrado == 1:
             email_valido = True
         else:
             cls()
             print("El email ya está registrado como alumno, moderador o administrador. Ingrese uno nuevo.")
-
-    # Guardar el email en el registro
     
     alumno.email = email
 
-    # Solicitar y validar la contraseña
     contraseña = input("\nIngrese contraseña (MAX. 32 Carac): \n")
     while len(contraseña) > 32:
         cls()
@@ -1449,7 +1439,6 @@ def registro():
    
     alumno.contraseña = contraseña
 
-    # Recolectar otros datos
     nombre = str(input("\nIngrese su nombre (MAX. 32 Carac): \n"))
     while len(nombre) < 3:
         cls()
@@ -1461,7 +1450,6 @@ def registro():
    
     alumno.nombre = nombre
 
-    # Fecha de nacimiento
     fNacimiento = str(input("\nIngrese su fecha de nacimiento (DD-MM-AAAA): "))
     fechaval = True
     while fechaval:
@@ -1472,7 +1460,6 @@ def registro():
             fNacimiento = input("Ingrese su fecha de nacimiento (DD-MM-AAAA): ")     
     alumno.fnac = fNacimiento
 
-    # Biografía
     bio = str(input("\nIngrese biografía (MAX. 255 Carac): \n"))
     while len(bio) > 255:
         cls()
@@ -1481,7 +1468,6 @@ def registro():
    
     alumno.bio = bio
     
-    # Hobbies
     hob = str(input("\nIngrese hobbies (MAX. 255 Carac): \n"))
     while len(hob) > 255:
         cls()
@@ -1493,7 +1479,7 @@ def registro():
     while sex != "M" and sex != "H" and sex != "N":
         sex = str(input("\nIngrese su sexo, M para mujer y H para hombre o N para no especificado\n"))
     alumno.sexo = sex
-    # Guardar el nuevo registro en el archivo
+    # guardar el nuevo registro en el archivo
     alumno.credito_revelar = 1
     alumno.puntaje = 0
     alumno.superlike = 1
@@ -1508,7 +1494,7 @@ def login():
     global maxint
 
     maxint = 0
-    encontrado = False  # Variable para controlar si se encontró un usuario válido
+    encontrado = False 
 
     while not encontrado and maxint < 3:
         cls()
@@ -1522,21 +1508,20 @@ def login():
             input("Ingrese un correo y contraseña válidos.\n")
             maxint += 1
         else:
-            # Búsqueda secuencial en Alumnos
             encontrado = buscarSecuencial(email, contr, arLoAlumnos, "alumno")
             
-            # Si no se encontró en alumnos, buscar en Moderadores
+            # Si no se encontró en alumnos
             if not encontrado:
                 encontrado = buscarSecuencial(email, contr, arLoModeradores, "moderador")
             
-            # Si no se encontró en moderadores, buscar en Administradores
+            # Si no se encontró en moderadores
             if not encontrado:
                 encontrado = buscarSecuencial(email, contr, arLoAdmin, "administrador")
 
             if not encontrado:  # Si no se encontró un usuario válido
                 input("Correo electrónico o contraseña inválidos, intente nuevamente:\n")
                 maxint += 1
-    # 3. Si se agotan los intentos
+    
     if maxint == 3:
         cls()
         print("Has agotado tus 3 intentos. El programa se cerrará.")
@@ -1544,56 +1529,55 @@ def login():
 
 def buscarSecuencial(email, contr, archivo, tipo_usuario):
     global id
-    archivo.seek(0, 0)  # Volver al inicio del archivo
-    usuario_encontrado = False  # Controla si encontramos un usuario
-    lectura_finalizada = False  # Controla si llegamos al final del archivo
+    archivo.seek(0, 0) 
+    usuario_encontrado = False  
+    lectura_finalizada = False 
 
     while not usuario_encontrado and not lectura_finalizada:
         try:
-            if archivo.tell() < os.path.getsize(archivo.name):  # Si no hemos llegado al final del archivo
-                usuario = pickle.load(archivo)  # Cargar el usuario actual
-
-                # Verificar si el email coincide
+            if archivo.tell() < os.path.getsize(archivo.name): 
+                usuario = pickle.load(archivo) 
+                
                 if usuario.email.strip() == email and usuario.contraseña.strip() == contr:
-                    # Verificar si el estado es activo
+                    
                     if usuario.estado == True:
                         cls()
                         input(f"\n|Bienvenido {usuario.nombre.strip()} ({tipo_usuario})|\n")
                         id = int(usuario.id)
                         if tipo_usuario == "alumno":
-                            opcmenuEst()  # Función para menú de estudiantes
+                            opcmenuEst()  
                         elif tipo_usuario == "moderador":
-                            opcmenuMod()  # Función para menú de moderadores
+                            opcmenuMod()  
                         elif tipo_usuario == "administrador":
-                            opcmenuAdmin()  # Función para menú de administradores
+                            opcmenuAdmin()  
                         
-                        usuario_encontrado = True  # Usuario encontrado
+                        usuario_encontrado = True  
                     else:
                         print(f"El usuario {usuario.nombre.strip()} está inactivo.")
                         input("Presione Enter para continuar...\n")
-                # Si el email no coincide, seguimos buscando
+                        lectura_finalizada = True  
+                
             else:
-                lectura_finalizada = True  # Si llegamos al final del archivo
+                lectura_finalizada = True  
         except EOFError:
-            lectura_finalizada = True  # Finalizamos si llegamos al final del archivo por un error
+            lectura_finalizada = True  
         except pickle.UnpicklingError:
             print("Error al cargar un registro, archivo corrupto o mal formado.")
-            lectura_finalizada = True  # Detenemos la lectura si hay un error de deserialización
+            lectura_finalizada = True  
         except Exception as e:
             print(f"Error inesperado: {e}")
-            lectura_finalizada = True  # Detenemos la lectura si hay otro error inesperado
+            lectura_finalizada = True  
 
-    return usuario_encontrado  # Devuelve si se encontró el usuario o no1
+    return usuario_encontrado  
 def buscarMailRep(email, archivo):
-    archivo.seek(0, 0)  # Volver al inicio del archivo
-    lectura_finalizada = False  # Controla si llegamos al final del archivo
+    archivo.seek(0, 0)  
+    lectura_finalizada = False 
 
     try:
         while not lectura_finalizada:
-            if archivo.tell() < os.path.getsize(archivo.name):  # Si no hemos llegado al final del archivo
-                usuario = pickle.load(archivo)  # Cargar el usuario actual
+            if archivo.tell() < os.path.getsize(archivo.name):  
+                usuario = pickle.load(archivo)  
 
-                # Verificar si el email coincide
                 if usuario.email.strip() == email:
                     # Verificar si el estado es activo
                     if usuario.estado == True:
@@ -1605,11 +1589,11 @@ def buscarMailRep(email, archivo):
                         input("Presione Enter para continuar...")
                         return -1
             else:
-                lectura_finalizada = True  # Si llegamos al final del archivo
+                lectura_finalizada = True  
     except EOFError:
         lectura_finalizada = True  # Finalizamos si llegamos al final del archivo
 
-    # Si no se encontró el email en todo el archivo, significa que está disponible
+    # no se encontro
     return 1
 inicializarArchivos()
 inicio()
