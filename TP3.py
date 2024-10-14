@@ -483,26 +483,42 @@ def fechaNac():
     fNacimiento = "_"
     while fNacimiento != "":
         cls()
-        arLoAlumnos.seek(0,0)
-        for i in range(0,id):
-            pos=arLoAlumnos.tell()
-            alumno=pickle.load(arLoAlumnos)
-        print("FECHA DE NACIMIENTO ACTUAL: " + alumno.fnac.strip())
+        arLoAlumnos.seek(0)  # Comenzar desde el inicio del archivo
+        alumno = None
+        pos = None
+
+        # Buscar el alumno por ID
+        try:
+            for i in range(0, id):
+                pos = arLoAlumnos.tell()
+                alumno = pickle.load(arLoAlumnos)
+            if alumno:  # Si encontramos el alumno
+                print("FECHA DE NACIMIENTO ACTUAL: " + alumno.fnac.strip())
+            else:
+                print("No se encontró el alumno.")
+                return
+        except EOFError:
+            print("Error al leer el archivo o ID fuera de rango.")
+            return
+
         print("")
         fNacimiento = input("Ingrese su nueva fecha de nacimiento (DD-MM-AAAA), o presione Enter para salir: ")
+
         if fNacimiento != "":
             if fechaValida(fNacimiento):
-                arLoAlumnos.seek(pos,0)
+                arLoAlumnos.seek(pos)  # Mover al inicio del alumno encontrado
                 alumno.fnac = fNacimiento
                 formatearAlumnos(alumno)
-                pickle.dump(alumno,arLoAlumnos)
-                arLoAlumnos.flush()
+                arLoAlumnos.seek(pos)  # Asegurarse de que el puntero esté en la posición correcta
+                pickle.dump(alumno, arLoAlumnos)
+                arLoAlumnos.flush()  # Asegurarse de escribir todo antes de cerrar
                 cls()
                 print("FECHA ACTUALIZADA A: " + alumno.fnac.strip())
                 input("")
             else:
                 print("Fecha ingresada no válida. Asegúrese de usar el formato DD-MM-AAAA, y una edad entre 18 y 122 años.")
                 input("Presione Enter para continuar\n")
+
 def cambiarBiografia():
     biografia = "_"
     while biografia != "":
@@ -517,9 +533,10 @@ def cambiarBiografia():
         biografia = input("Ingrese su nueva biografía, o presione Enter para salir: ")
         if biografia != "":
             cls()
-            arLoAlumnos.seek(pos,0)
+            arLoAlumnos.seek(pos)
             alumno.bio=biografia
             formatearAlumnos(alumno)
+            arLoAlumnos.seek(pos)
             pickle.dump(alumno,arLoAlumnos)
             arLoAlumnos.flush()
             print("BIOGRAFIA ACTUALIZADA A: " + alumno.bio.strip())
@@ -1350,6 +1367,7 @@ def Bonustrack1():
         racha=0
         posAlumno=arLoAlumnos.tell()
         alumno = pickle.load(arLoAlumnos)
+        alumno.puntaje=0
         if alumno.estado:#si el alumno esta activo recorre el archivo likes
             likeDevuelto = False
             arLoLikes.seek(0,0)
@@ -1365,13 +1383,13 @@ def Bonustrack1():
                             likeDevuelto = True
                     if likeDevuelto:#si le devuelven el like
                         if racha<3:#y la racha es menor a 3 le suma un punto y extiende la racha
-                            alumno.puntaje=int(alumno.puntaje.strip())+1
+                            alumno.puntaje=alumno.puntaje+1
                             racha+=1
                         else:#y la racha es mayor o igual a 3 le suma 2 pusntos y anade rtacha
-                            alumno.puntaje=int(alumno.puntaje.strip())+2
+                            alumno.puntaje=alumno.puntaje.strip()+2
                             racha+=1
                     else:#si no le devolvieron el like reinicia racha y le resta un punto
-                        alumno.puntaje=int(alumno.puntaje.strip())-1
+                        alumno.puntaje=alumno.puntaje.strip()-1
                         racha=0
                     arLoAlumnos.seek(posAlumno,0)
                     formatearAlumnos(alumno)
