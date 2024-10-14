@@ -706,7 +706,7 @@ def revelarCandidato():
     for i in range(0,id):
         pos=arLoAlumnos.tell()
         alumno1=pickle.load(arLoAlumnos)
-    print(f"¿Esta seguro que desea revelar candidatos?(s/n) Se revelaran un maximo de 3 estudiantes que le hatan dado like y se consumira un credito. Actualmente tienes {alumno1.credito_revelar} creditos")
+    print(f"¿Esta seguro que desea revelar candidatos?(s/n) Se revelaran un maximo de 3 estudiantes que le hayan dado like y se consumira un credito. Actualmente tienes {alumno1.credito_revelar} creditos")
     opc = input()
     while opc != 's' and opc != 'n':
         opc = input("Respuesta inválida. ¿desea revelar candidatos? (s/n): ")
