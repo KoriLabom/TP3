@@ -720,7 +720,8 @@ def revelarCandidato():
                     alumno=pickle.load(arLoAlumnos)
                 print(f"||Candidato: {n}||Nombre:{alumno.nombre.strip()}||Fecha de nacimiento:{alumno.fnac.strip()}||Edad:{calcularEdad(alumno.fnac.strip())}||Biografia:{alumno.bio.strip()}||Hobbies:{alumno.hob.strip()}||")
                 n+=1
-        alumno1.credito_revelar -= 1
+        alumno1.credito_revelar = int(alumno1.credito_revelar)-1
+        formatearAlumnos(alumno1)
         arLoAlumnos.seek(pos,0)
         pickle.dump(alumno1,arLoAlumnos)
         arLoAlumnos.flush()
@@ -1014,6 +1015,7 @@ def reportes():
                 alumno.estado = False
                 # Mueve el puntero a la posición del alumno leído para sobrescribirlo
                 arLoAlumnos.seek(posa,0)
+                formatearAlumnos(alumno)
                 # Sobrescribe el registro del alumno en el archivo
                 pickle.dump(alumno, arLoAlumnos)
                 arLoAlumnos.flush()  # Asegura que los datos se escriban
