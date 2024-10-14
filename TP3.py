@@ -1,3 +1,10 @@
+#DECLARATIVA DE VARIABLES
+# INTS: id, maxint, opcE, opcsubp, id_alum, cantidadAlumnos, totalCandidatos, likesRecibidosNoDevueltos, likesDadosNoDevueltos, matcheos, id_estudiante, pos, usuario_encontrado, opcion, opcionSubmenu, opcionPerfil, meGustaID, opcionMenu, opcionMenuModerador, idReportado, idActual, idReporte, cantReportes, cantReportesIgnorados, cantReportesAceptados, cantReportesDescartados, racha, n, id_mod likesRecibidosNoDevueltos, likesDadosNoDevueltos, matcheos, id_estudiante, pos, usuario_encontrado, idReportado, idActual, idReporte, cantReportes, cantReportesIgnorados, cantReportesAceptados, cantReportesDescartados, idreporte, racha, n, id_mod, id_alum
+# STRINGS: email, contraseña, nombre, fNacimiento, bio, hob, sex, meGusta, opcion, opcionSubmenu, opcionPerfil, motivo, idReportado, opcionMenu, opcionMenuModerador, idreporte, reporte.estado, reporte.razon_reporte, tipo_usuario, email_valido, contraseña_valida, nombre_valido, fechaval, emisor_encontrado, usuario_activo, usuario_inactivo, usuario_en_proceso, opc, es_entero, id, maxint, opcE, opcsubp, id_alum, cantidadAlumnos, totalCandidatos, likesRecibidosNoDevueltos, likesDadosNoDevueltos, matcheos, id_estudiante, pos, usuario_encontrado, idActual, idReporte, cantReportes, cantReportesIgnorados, cantReportesAceptados, cantReportesDescartados, racha, n, id_mod
+# BOOLS: salir, encontrado, usuario_encontrado, email_valido, contraseña_valida, nombre_valido, fechaval, contraseña_valida, emisor_encontrado, usuario_activo, usuario_inactivo, usuario_en_proceso, es_entero, tipo_usuario
+# FLOATS: probabilidad
+# ARCHIVOS:  arFiAlumnos, arLoAlumnos, arFiModeradores, arLoModeradores, arFiAdmin, arLoAdmin, arFiLikes, arLoLikes, arFiReportes, arLoReportes
+# CHARS: sex, sexo, opc
 import pickle ; import os ; import os.path ; import datetime ; from datetime import datetime, date ; import io ; import getpass
 
 class Alumno:
@@ -789,38 +796,30 @@ def verCandidatos():
                         opc = input("Ingrese opción: ")
                     
                     if opc == "1":
-                        # Este es el código donde hacemos la verificación del superlike y guardamos la información
-                        print(f"Superlike actual del emisor: {emisor.superlike}")  # Verifica el valor antes de restar
-                        input(f"Tipo de superlike: {type(emisor.superlike)}")  # Confirma el tipo de dato
-
-                        # Verificación y manejo de SuperLike
-                        if emisor.superlike.strip() == "1":  # Verificar que sea cadena con un solo dígito
+                        if emisor.superlike.strip() == "1":  
                             print(f"\nUsted ha dado SuperLike a: {alumno.nombre.strip()}")
 
-                            # Guardar el SuperLike (like de ida)
                             like.remitente = id
                             like.destinatario = id_estudiante
-                            arLoLikes.seek(0, 2)  # Ir al final del archivo para añadir
+                            arLoLikes.seek(0, 2) 
                             pickle.dump(like, arLoLikes)
-                            arLoLikes.flush()  # Asegurarse de que los datos se escriben en el archivo
-
-                            # Guardar el SuperLike de vuelta (like de vuelta)
+                            arLoLikes.flush()  
+                            
                             like.remitente = id_estudiante
                             like.destinatario = id
-                            pickle.dump(like, arLoLikes)  # Añadir el SuperLike de vuelta
-                            arLoLikes.flush()  # Asegurarse de que los datos se escriben en el archivo
+                            pickle.dump(like, arLoLikes)  
+                            arLoLikes.flush()  
 
                             print("SuperLike guardado exitosamente.")
 
-                            # Convertir el superlike del emisor a número, restar 1 y convertirlo de vuelta a cadena
-                            nuevo_superlike = str(int(emisor.superlike.strip()) - 1)  # Convertir a entero, restar y volver a cadena
-                            emisor.superlike = nuevo_superlike  # Guardar el nuevo valor como cadena
+                            
+                            nuevo_superlike = str(int(emisor.superlike.strip()) - 1)  
+                            emisor.superlike = nuevo_superlike  
                             print(f"Nuevo valor de superlike: {emisor.superlike}")
 
-                            # Actualizar el registro del emisor en el archivo de alumnos
-                            arLoAlumnos.seek(pos, 0)  # Volver a la posición del registro
-                            formatearAlumnos(emisor)  # Asegurarse de que el registro esté formateado
-                            pickle.dump(emisor, arLoAlumnos)  # Guardar el registro actualizado
+                            arLoAlumnos.seek(pos, 0)  
+                            formatearAlumnos(emisor)  
+                            pickle.dump(emisor, arLoAlumnos)  
                             arLoAlumnos.flush()
 
                             print("Perfil del emisor actualizado con el nuevo superlike.")
@@ -849,9 +848,9 @@ def verificarMatch(remitente, destinatario):
     arLoLikes.seek(0, 0)
     while arLoLikes.tell() < os.path.getsize(arFiLikes) and not encontrado:
         like = pickle.load(arLoLikes)
-        # Si el destinatario coincide con el remitente en el like
+        #si destinatario == remitente en el like
         if str(like.remitente).strip() == str(destinatario).strip() and str(like.destinatario).strip() == str(remitente).strip():
-            encontrado = True  # Se encontró un match
+            encontrado = True
     arLoLikes.seek(pos, 0)
     return encontrado
 
@@ -862,45 +861,39 @@ def reportesEstadisticos():
     likesRecibidosNoDevueltos = 0
     likesDadosNoDevueltos = 0
     matcheos = 0
-    totalCandidatos = 0  # Candidatos distintos al usuario logueado
+    totalCandidatos = 0  #candidatos dist al usuario log
 
-    arLoAlumnos.seek(0, 0)  # Asegurarse de empezar desde el principio del archivo de alumnos
+    arLoAlumnos.seek(0, 0)  
     while arLoAlumnos.tell() < os.path.getsize(arFiAlumnos):
         alumno = pickle.load(arLoAlumnos)
-        # Contar los candidatos (alumnos activos diferentes al usuario actual)
+        
         if alumno.estado and alumno.id != id:
             totalCandidatos += 1
 
-    arLoLikes.seek(0, 0)  # Asegurarse de empezar desde el principio del archivo de likes
+    arLoLikes.seek(0, 0)  
     while arLoLikes.tell() < os.path.getsize(arFiLikes):
         like = pickle.load(arLoLikes)
 
-        # Si el remitente es el usuario actual (id), es un like que diste
         if str(like.remitente).strip() == str(id).strip():
             if not verificarMatch(like.remitente, like.destinatario):
-                likesDadosNoDevueltos += 1  # Likes dados que no han sido devueltos
+                likesDadosNoDevueltos += 1  
             else:
-                matcheos += 1  # Likes que han sido matcheados
+                matcheos += 1 
 
-        # Si el destinatario es el usuario actual (id), es un like que recibiste
         elif str(like.destinatario).strip() == str(id).strip():
             if not verificarMatch(like.remitente, like.destinatario):
-                likesRecibidosNoDevueltos += 1  # Likes recibidos y no respondidos
+                likesRecibidosNoDevueltos += 1 
 
-    # Calcular el porcentaje de matcheos (sobre el total de candidatos activos)
     if totalCandidatos > 0:
         probabilidad = (matcheos / (totalCandidatos-1)) * 100
     else:
-        probabilidad = 0  # Si no hay candidatos, la probabilidad es 0
+        probabilidad = 0 
 
-    # Mostrar los resultados
     print("Porcentaje de matcheos sobre el total posible: {:.1f}%".format(probabilidad))
     print("Likes dados y no recibidos: " + str(likesDadosNoDevueltos))
     print("Likes recibidos y no respondidos: " + str(likesRecibidosNoDevueltos))
 
     input("\nPresione Enter para volver...")
-
-#funciones Moderadores
 def mostrarEstudiantes():
     cantidadAlumnos=1
     arLoAlumnos.seek(0,0)
@@ -1004,23 +997,20 @@ def reportes():
             elif opc == "2":
                 idreportado = reporte.id_reportado
                 arLoAlumnos.seek(0, 0)
-                # Recorre hasta el registro del alumno con id == idreportado
+                
                 for i in range(0, idreportado):
-                    posa = arLoAlumnos.tell()  # Guarda la posición actual
+                    posa = arLoAlumnos.tell()  
                     alumno = pickle.load(arLoAlumnos)
-                # Cambia el estado del alumno
+                
                 alumno.estado = False
-                # Mueve el puntero a la posición del alumno leído para sobrescribirlo
                 arLoAlumnos.seek(posa,0)
                 formatearAlumnos(alumno)
-                # Sobrescribe el registro del alumno en el archivo
                 pickle.dump(alumno, arLoAlumnos)
-                arLoAlumnos.flush()  # Asegura que los datos se escriban
+                arLoAlumnos.flush() 
 
-                # Actualiza el reporte
                 reporte.estado = 1
                 pickle.dump(reporte, arLoReportes)
-                arLoReportes.flush()  # Asegura que los datos se escriban
+                arLoReportes.flush()  
                 moderador.reportes_aceptados += 1
                 pickle.dump(moderador, arLoModeradores)
                 arLoModeradores.flush()
@@ -1030,7 +1020,6 @@ def reportes():
                 idreporte = ""
         else:
             input("ID inválido")
-
 
 def mostrarModeradores():
     cantidadModeradores=1
@@ -1090,11 +1079,10 @@ def darAltaMod():
     moderador = Moderador()
     arLoModeradores.seek(0, 0)
 
-    # Calcular tamaño del registro
     moderador = pickle.load(arLoModeradores)
     tamReg = arLoModeradores.tell()
     tamArc = os.path.getsize(arFiModeradores)
-    # Cantidad de registros
+
     cantReg = tamArc // tamReg
     id_mod = str(cantReg + 1)
     if len(id_mod) < 5:
@@ -1102,11 +1090,10 @@ def darAltaMod():
     else:
         moderador.id = id_mod
         
-    arLoModeradores.seek(0, 2)  # Mover el puntero al final del archivo para agregar un nuevo registro
+    arLoModeradores.seek(0, 2)  
 
     salir = False
 
-    # Ingreso de email
     email_valido = False
     while not email_valido and not salir:
         cls()
@@ -1122,7 +1109,6 @@ def darAltaMod():
             cls()
             print("El correo debe tener mínimo 12 caracteres.")
         else:
-            # Comprobar el email en los archivos
             encontrado = buscarMailRep(email, arLoAlumnos)
             if encontrado == 1:
                 encontrado = buscarMailRep(email, arLoModeradores)
